@@ -14,6 +14,10 @@ const FA_DIR = 'node_modules/@fortawesome/fontawesome-free/svgs/solid';
 const FONT_DIR = 'node_modules/@fontsource-variable/inter/files';
 
 let html = readFileSync('src.html', 'utf8');
+html = html.replace('/*__LAYOUT_CSS__*/', readFileSync('wellness-layout.css', 'utf8'))
+  .replace('/*__LAYOUT_JS__*/', readFileSync('wellness-layout.js', 'utf8'))
+  .replace('/*__REFINEMENT_CSS__*/', readFileSync('reference-polish.css', 'utf8').replace('/*__BOTANICAL__*/', readFileSync('botanical.svg').toString('base64')))
+  .replace('/*__REFINEMENT_JS__*/', readFileSync('reference-polish.js', 'utf8'));
 
 // ---------- Iconițe ----------
 function loadIcon(name) {
@@ -28,7 +32,7 @@ html = html.replace(/<i data-fa="([a-z0-9-]+)"(?: class="([^"]*)")?><\/i>/g, (_,
 });
 if (/data-fa=/.test(html)) throw new Error('Iconițe neînlocuite rămase');
 
-const dynamic = ['mug-hot', 'bowl-food', 'apple-whole', 'moon', 'fire', 'sun', 'circle-half-stroke',
+const dynamic = ['calculator', 'person-running', 'mug-hot', 'bowl-food', 'apple-whole', 'moon', 'fire', 'sun', 'circle-half-stroke',
   'circle-check', 'circle-exclamation', 'clipboard-check', 'up-right-from-square', 'download', 'flag-checkered', 'triangle-exclamation', 'circle-info', 'user', 'chart-pie', 'utensils', 'chart-line', 'square-root-variable', 'book', 'globe'];
 html = html.replace('/*__ICONS__*/{}', JSON.stringify(Object.fromEntries(dynamic.map(n => [n, loadIcon(n)]))));
 

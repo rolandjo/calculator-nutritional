@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 300" fill="none">
+ <defs>
+  <linearGradient id="a" x1="242" y1="40" x2="386" y2="199" gradientUnits="userSpaceOnUse"><stop stop-color="#b1c397"/><stop offset=".48" stop-color="#77996d"/><stop offset="1" stop-color="#3e7055"/></linearGradient>
+  <linearGradient id="b" x1="106" y1="80" x2="298" y2="211" gradientUnits="userSpaceOnUse"><stop stop-color="#c0cd9c"/><stop offset="1" stop-color="#7e9f6d"/></linearGradient>
+  <linearGradient id="c" x1="265" y1="159" x2="422" y2="257" gradientUnits="userSpaceOnUse"><stop stop-color="#c6d5ab"/><stop offset="1" stop-color="#96b080"/></linearGradient>
+  <linearGradient id="d" x1="115" y1="183" x2="296" y2="284" gradientUnits="userSpaceOnUse"><stop stop-color="#aabf85"/><stop offset="1" stop-color="#73965e"/></linearGradient>
+  <filter id="paper"><feTurbulence baseFrequency=".65" numOctaves="3" seed="12" type="fractalNoise" result="n"/><feComposite in="n" in2="SourceGraphic" operator="in" result="t"/><feComponentTransfer in="t" result="f"><feFuncA type="linear" slope=".2"/></feComponentTransfer><feBlend in="SourceGraphic" in2="f" mode="soft-light"/></filter>
+  <clipPath id="leaves"><path d="M327 178C270 113 307 35 418-10c13 89-19 151-91 188ZM300 188C229 182 197 107 99 74c111-37 197 2 201 114ZM342 214C340 132 386 78 484 64c-10 91-59 144-142 150ZM302 241C220 188 155 196 89 292c107 8 170-2 213-51ZM342 270c7-55 55-85 131-72-24 53-66 78-131 72Z"/></clipPath>
+ </defs>
+ <g filter="url(#paper)">
+  <path d="M327 178C270 113 307 35 418-10c13 89-19 151-91 188Z" fill="url(#a)"/>
+  <path d="M300 188C229 182 197 107 99 74c111-37 197 2 201 114Z" fill="url(#b)"/>
+  <path d="M342 214C340 132 386 78 484 64c-10 91-59 144-142 150Z" fill="url(#c)"/>
+  <path d="M302 241C220 188 155 196 89 292c107 8 170-2 213-51Z" fill="url(#d)"/>
+  <path d="M342 270c7-55 55-85 131-72-24 53-66 78-131 72Z" fill="url(#c)"/>
+  <path d="M308 294c-50-22-88-12-120 41 65 7 100-8 120-41Z" fill="url(#b)"/>
+ </g>
+ <g stroke="#5d7e51" stroke-width="1" opacity=".4" clip-path="url(#leaves)">
+  <path d="M326 176Q342 86 411 3M299 186Q244 103 113 77M343 213Q400 123 473 67M300 240Q194 228 101 287M343 269Q392 224 466 202"/>
+  <path d="m339 125 48-13m-35-20 38-9m-25-19 30-7m-61 99 38-14m-61-28-11-27m35 1-9-32m-52 122-12-33m-13 11-10-34m-18 16-9-29m-15 14-12-26m-18 8-12-21m54 72-34 4m17-21-40 3m5-18-38-1m73 170-18 29m-13-27-19 27m-11-24-22 23m-12-17-23 23m72-38-23-20m-6 21-26-18m169-58 32-3m-14-20 31-2m-10-21 29-1m-57 62-4-27m21-1-2-23"/>
+ </g>
+ <path d="M379 327C351 271 320 232 298 189M325 231c-9-27-4-39 3-58M341 257c-18-15-27-17-45-17M347 269l-5-57" stroke="#527347" stroke-width="3" stroke-linecap="round"/>
+</svg>
