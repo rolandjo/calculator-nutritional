@@ -1,7 +1,9 @@
 // Build: src.html -> fișier HTML autonom
-//   node build.mjs offline calculator_nutritional_v12.html   (fonturi incluse, merge fără internet)
-//   node build.mjs sites   calculator_nutritional_v12_google_sites.html (font din Google Fonts, fișier mai mic)
-import { readFileSync, writeFileSync } from 'node:fs';
+//   node build.mjs offline calculator_nutritional.html   (fonturi incluse, merge fără internet, fără PWA)
+//   node build.mjs sites   (font din Google Fonts, fișier mai mic → ../google-sites/)
+//   node build.mjs github  ../index.html   (offline + PWA: manifest, service worker, iconițe — pentru GitHub Pages)
+import { readFileSync, writeFileSync, cpSync, existsSync } from 'node:fs';
+import { dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import colors from 'tailwindcss/colors.js';
 
@@ -26,7 +28,7 @@ html = html.replace(/<i data-fa="([a-z0-9-]+)"(?: class="([^"]*)")?><\/i>/g, (_,
 if (/data-fa=/.test(html)) throw new Error('Iconițe neînlocuite rămase');
 
 const dynamic = ['mug-hot', 'bowl-food', 'apple-whole', 'moon', 'fire', 'sun', 'circle-half-stroke',
-  'circle-check', 'circle-exclamation', 'clipboard-check', 'up-right-from-square', 'download', 'flag-checkered', 'triangle-exclamation', 'circle-info'];
+  'circle-check', 'circle-exclamation', 'clipboard-check', 'up-right-from-square', 'download', 'flag-checkered', 'triangle-exclamation', 'circle-info', 'user', 'chart-pie', 'utensils', 'chart-line', 'square-root-variable', 'book', 'globe'];
 html = html.replace('/*__ICONS__*/{}', JSON.stringify(Object.fromEntries(dynamic.map(n => [n, loadIcon(n)]))));
 
 // ---------- Fonturi ----------
@@ -40,6 +42,14 @@ if (VARIANT === 'sites') {
 @font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:100 900;src:url(data:font/woff2;base64,${b64('inter-latin-wght-normal.woff2')}) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}`.trim();
 }
 html = html.replace('/*__FONTS__*/', fonts);
+
+// ---------- PWA (doar varianta GitHub Pages) ----------
+if (VARIANT === 'github') {
+  html = html.replace('<!--__PWA_HEAD__-->', '<link rel="manifest" href="manifest.webmanifest">\n  <meta name="theme-color" content="#4f46e5">\n  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">\n  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">');
+  html = html.replace('/*__PWA_JS__*/', "if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); }); }");
+} else {
+  html = html.replace('<!--__PWA_HEAD__-->', '').replace('/*__PWA_JS__*/', '');
+}
 
 // ---------- Culori ca variabile CSS (mod întunecat = scala inversată) ----------
 const PALETTES = ['slate', 'red', 'rose', 'pink', 'orange', 'amber', 'lime', 'emerald', 'teal', 'sky', 'blue', 'indigo', 'violet'];
@@ -67,4 +77,5 @@ execFileSync('npx', ['tailwindcss', '-c', '.tw.config.cjs', '-i', '.tw-in.css', 
 html = html.replace('/*__TAILWIND__*/', readFileSync('.tw-out.css', 'utf8'));
 
 writeFileSync(OUT, html);
+if (VARIANT === 'github' && existsSync('pwa')) cpSync('pwa', dirname(OUT), { recursive: true }); // manifest, sw.js, iconițe lângă index.html
 console.log(`OK [${VARIANT}] -> ${OUT} (${(html.length / 1024).toFixed(0)} KB)`);

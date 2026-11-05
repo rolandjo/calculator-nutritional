@@ -1,13 +1,14 @@
 {
   "name": "calculator-nutritional",
-  "version": "12.0.0",
+  "version": "16.0.0",
   "private": true,
-  "description": "Calculator nutrițional: BMR Mifflin-St Jeor, TDEE, macronutrienți, mese, proiecția greutății (model dinamic Hall) și calcul invers după țintă și termen.",
+  "description": "Calculator nutrițional: BMR Mifflin-St Jeor, TDEE, macronutrienți, IMC, mese, proiecția greutății (model dinamic Hall), calcul invers după țintă și termen; RO/EN, PWA.",
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "node build.mjs offline ../index.html",
+    "build": "node build.mjs github ../index.html",
     "build:sites": "node build.mjs sites ../google-sites/calculator_nutritional_google_sites.html",
+    "build:offline": "node build.mjs offline calculator_nutritional.html",
     "build:all": "npm run build && npm run build:sites"
   },
   "devDependencies": {
