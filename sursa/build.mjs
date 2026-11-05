@@ -1,0 +1,70 @@
+// Build: src.html -> fișier HTML autonom
+//   node build.mjs offline calculator_nutritional_v12.html   (fonturi incluse, merge fără internet)
+//   node build.mjs sites   calculator_nutritional_v12_google_sites.html (font din Google Fonts, fișier mai mic)
+import { readFileSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import colors from 'tailwindcss/colors.js';
+
+const VARIANT = process.argv[2] || 'offline';
+const OUT = process.argv[3] || (VARIANT === 'sites' ? '../google-sites/calculator_nutritional_google_sites.html' : '../index.html');
+const FA_DIR = 'node_modules/@fortawesome/fontawesome-free/svgs/solid';
+const FONT_DIR = 'node_modules/@fontsource-variable/inter/files';
+
+let html = readFileSync('src.html', 'utf8');
+
+// ---------- Iconițe ----------
+function loadIcon(name) {
+  const svg = readFileSync(`${FA_DIR}/${name}.svg`, 'utf8');
+  const viewBox = svg.match(/viewBox="([^"]+)"/)[1];
+  const d = [...svg.matchAll(/<path[^>]*\sd="([^"]+)"/g)].map(m => m[1]).join(' ');
+  return { viewBox, d };
+}
+html = html.replace(/<i data-fa="([a-z0-9-]+)"(?: class="([^"]*)")?><\/i>/g, (_, name, cls) => {
+  const { viewBox, d } = loadIcon(name);
+  return `<svg class="fa-ico${cls ? ' ' + cls : ''}" viewBox="${viewBox}" aria-hidden="true"><path fill="currentColor" d="${d}"/></svg>`;
+});
+if (/data-fa=/.test(html)) throw new Error('Iconițe neînlocuite rămase');
+
+const dynamic = ['mug-hot', 'bowl-food', 'apple-whole', 'moon', 'fire', 'sun', 'circle-half-stroke',
+  'circle-check', 'circle-exclamation', 'clipboard-check', 'up-right-from-square', 'download', 'flag-checkered', 'triangle-exclamation', 'circle-info'];
+html = html.replace('/*__ICONS__*/{}', JSON.stringify(Object.fromEntries(dynamic.map(n => [n, loadIcon(n)]))));
+
+// ---------- Fonturi ----------
+let fonts;
+if (VARIANT === 'sites') {
+  fonts = "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap');";
+} else {
+  const b64 = f => readFileSync(`${FONT_DIR}/${f}`).toString('base64');
+  fonts = `
+@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:100 900;src:url(data:font/woff2;base64,${b64('inter-latin-ext-wght-normal.woff2')}) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:100 900;src:url(data:font/woff2;base64,${b64('inter-latin-wght-normal.woff2')}) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}`.trim();
+}
+html = html.replace('/*__FONTS__*/', fonts);
+
+// ---------- Culori ca variabile CSS (mod întunecat = scala inversată) ----------
+const PALETTES = ['slate', 'red', 'rose', 'pink', 'orange', 'amber', 'lime', 'emerald', 'teal', 'sky', 'blue', 'indigo', 'violet'];
+const SHADES = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'];
+const rgb = hex => { const n = parseInt(hex.slice(1), 16); return `${n >> 16} ${(n >> 8) & 255} ${n & 255}`; };
+const light = ['--c-white:255 255 255'];
+const dark = [`--c-white:${rgb(colors.slate[900])}`];
+const twColors = { transparent: 'transparent', current: 'currentColor', black: '#000', white: 'rgb(var(--c-white) / <alpha-value>)' };
+for (const p of PALETTES) {
+  twColors[p] = {};
+  SHADES.forEach((s, i) => {
+    light.push(`--c-${p}-${s}:${rgb(colors[p][s])}`);
+    dark.push(`--c-${p}-${s}:${rgb(colors[p][SHADES[SHADES.length - 1 - i]])}`);
+    twColors[p][s] = `rgb(var(--c-${p}-${s}) / <alpha-value>)`;
+  });
+}
+// Variabilele întunecate se aplică doar pe ecran: la tipărire rămân culorile luminoase
+html = html.replace('/*__COLOR_VARS__*/', `:root{${light.join(';')}}@media screen{html.dark{${dark.join(';')}}}`);
+
+// ---------- Tailwind ----------
+writeFileSync('.tw-content.html', html);
+writeFileSync('.tw-in.css', '@tailwind base;@tailwind components;@tailwind utilities;');
+writeFileSync('.tw.config.cjs', `module.exports = ${JSON.stringify({ content: ['./.tw-content.html'], theme: { colors: twColors } })};`);
+execFileSync('npx', ['tailwindcss', '-c', '.tw.config.cjs', '-i', '.tw-in.css', '-o', '.tw-out.css', '--minify'], { stdio: 'inherit' });
+html = html.replace('/*__TAILWIND__*/', readFileSync('.tw-out.css', 'utf8'));
+
+writeFileSync(OUT, html);
+console.log(`OK [${VARIANT}] -> ${OUT} (${(html.length / 1024).toFixed(0)} KB)`);
