@@ -11,7 +11,7 @@
   #app-header button { min-height:40px; border:0; box-shadow:none; background:var(--wellness-soft); }
   #primary-nav { display:flex; justify-content:center; flex:1; gap:6px; }
   #primary-nav a { display:flex; align-items:center; gap:10px; padding:13px 16px; font-size:13px; font-weight:550; border-radius:22px; text-decoration:none; }
-  #primary-nav a[href="#results-section"] { background:var(--wellness-soft); color:var(--wellness-brand); font-weight:700; }
+  #primary-nav a[aria-current] { background:var(--wellness-soft); color:var(--wellness-brand); font-weight:700; }
   #primary-nav a:hover, #mobile-tabs a:hover { background:var(--wellness-soft); }
   #mobile-tabs { display:none; }
   #layout { display:grid; grid-template-columns:304px minmax(0,1fr); gap:24px; align-items:start; }

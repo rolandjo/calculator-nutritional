@@ -70,6 +70,33 @@ function setupReferencePolish(){
  menu.addEventListener('click',()=>{const open=menu.getAttribute('aria-expanded')!=='true';menu.setAttribute('aria-expanded',String(open));header.classList.toggle('menu-open',open);});
  header.append(menu);
  [...$('primary-nav').children].forEach((a,i)=>replaceOutline(a,['user','heart','utensils','chart'][i]));
+ // Top navigation: Profile/Goal live in the sticky sidebar, so they scroll the sidebar (not the page);
+ // the clicked item becomes current and the target panel is briefly highlighted.
+ const primaryNav=$('primary-nav'), navLinks=[...primaryNav.querySelectorAll('a')], navSidebar=$('profile-sidebar');
+ let navLock=0;
+ const setCurrent=id=>navLinks.forEach(a=>a.getAttribute('href')==='#'+id?a.setAttribute('aria-current','location'):a.removeAttribute('aria-current'));
+ primaryNav.addEventListener('click',e=>{
+  const a=e.target.closest('a'); if(!a) return;
+  e.preventDefault(); e.stopPropagation();
+  const id=a.getAttribute('href').slice(1), target=$(id); if(!target) return;
+  const behavior=matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
+  if(navSidebar&&navSidebar.contains(target)&&getComputedStyle(navSidebar).position==='sticky'&&navSidebar.scrollHeight>navSidebar.clientHeight+1){
+   navSidebar.scrollTo({top:target.getBoundingClientRect().top-navSidebar.getBoundingClientRect().top+navSidebar.scrollTop-12,behavior});
+  } else if(!(navSidebar&&navSidebar.contains(target)&&getComputedStyle(navSidebar).position==='sticky')) {
+   target.scrollIntoView({behavior,block:'start'});
+  }
+  if(!target.hasAttribute('tabindex')) target.setAttribute('tabindex','-1');
+  target.focus({preventScroll:true});
+  setCurrent(id); navLock=Date.now();
+  target.classList.remove('nav-flash'); void target.offsetWidth; target.classList.add('nav-flash');
+  setTimeout(()=>target.classList.remove('nav-flash'),1300);
+ });
+ let spyQueued=false;
+ const spy=()=>{spyQueued=false; if(Date.now()-navLock<1200) return;
+  const proj=$('projection-section'), atEnd=scrollY+innerHeight>=document.documentElement.scrollHeight-2;
+  setCurrent(proj&&(atEnd&&scrollY>0||proj.getBoundingClientRect().top<innerHeight*0.45)?'projection-section':'results-section');};
+ addEventListener('scroll',()=>{if(!spyQueued){spyQueued=true;requestAnimationFrame(spy);}},{passive:true});
+ spy();
  replaceOutline($('inputs-section').querySelector('.panel-heading'),'user');
  replaceOutline($('goal-section').querySelector('.panel-heading'),'target');
  replaceOutline(document.querySelector('.activity-selected'),'runner');
@@ -84,6 +111,16 @@ function setupReferencePolish(){
  options.append(document.querySelector('.body-details'));
  const activityHelp=document.querySelector('.activity-help');
  activityHelp.querySelector('summary').replaceChildren(outlineIcon('info'),h('span',{class:'sr-only'},'Ce înseamnă nivelurile?'));
+ // The info and settings triggers stay in the same place with the same icon when open; only their state changes.
+ const disclosureTrigger=(details,id,name,label)=>{
+  details.id=details.id||id; details.querySelector(':scope > summary').hidden=true;
+  const button=h('button',{type:'button',class:'disclosure-trigger','aria-expanded':'false','aria-controls':details.id,'aria-label':label,title:label},outlineIcon(name));
+  button.addEventListener('click',()=>{details.open=!details.open;});
+  details.addEventListener('toggle',()=>button.setAttribute('aria-expanded',String(details.open)));
+  return button;
+ };
+ activityHelp.before(disclosureTrigger(activityHelp,'activity-help-panel','info','Ce înseamnă nivelurile?'));
+ goal.append(disclosureTrigger(options,'goal-options','settings','Țintă și setări avansate'));
  const slider=$('goal-slider-wrapper');
  const guide=h('details',{class:'slider-guide'},h('summary',null,'Intervale și precauții'));
  guide.append($('zone-safe').parentElement.parentElement,$('goal-slider-hint'));
