@@ -4011,7 +4011,7 @@ function setupReferencePolish(){
  const extra=h('details',{id:'wellness-extras',class:'scientific-details scroll-target'},h('summary',null,outlineIcon('leaf'),h('span',null,'Fibre, lichide și monitorizare')));
  const fibre=$('val-fiber').closest('.print-card').parentElement;
  const monitor=[...$('results-section').children].find(el=>el.textContent.includes('Recomandare practică de monitorizare:'));
- $('formulas').before(extra);extra.append(fibre);if(monitor)extra.append(monitor);
+ intro.before(extra);extra.append(fibre);if(monitor)extra.append(monitor);
  // The scientific detail stays on the page, below the reference dashboard.
  for(const [id,label,name] of [['formulas','Detalii și formule','book'],['references','Surse științifice','external']]) {
   const details=$(id);details.classList.add('scientific-details');
