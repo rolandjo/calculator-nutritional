@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculator Nutrițional Avansat & Formule Științifice</title>
+  <title>Nutriție · Calculator nutrițional și plan personalizat</title>
   <!--
     Fișier autonom: funcționează offline (fără CDN).
     Iconițe: Font Awesome Free 7 (CC BY 4.0) — https://fontawesome.com/license/free
@@ -25,6 +25,94 @@
   <style>/*__TAILWIND__*/</style>
   <style>
     body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+
+    /* Botanical Precision · visual design system · responsive, offline-safe */
+    :root {
+      --wellness-canvas:#F7F6F2;
+      --wellness-surface:#FFFEFB;
+      --wellness-border:#DFE5DC;
+      --wellness-ink:#203B34;
+      --wellness-muted:#576B61;
+      --wellness-brand:#2F6755;
+      --wellness-soft:#E8F0E8;
+      --wellness-shadow:0 8px 32px rgba(31,59,48,.045),0 1px 2px rgba(31,59,48,.035);
+    }
+    html.dark {
+      --wellness-canvas:#101E19;
+      --wellness-surface:#192A22;
+      --wellness-border:#344A3C;
+      --wellness-ink:#EDF5ED;
+      --wellness-muted:#B5C9BA;
+      --wellness-brand:#88B69A;
+      --wellness-soft:#273F32;
+      --wellness-shadow:0 10px 34px rgba(0,0,0,.15);
+    }
+    @media screen {
+      body { background:var(--wellness-canvas); color:var(--wellness-ink); letter-spacing:-.008em; }
+      #layout { max-width:1460px; }
+      #content-col { min-width:0; }
+      #content-col > header { padding:12px 2px 18px; gap:15px; }
+      #content-col > header h1 { font-weight:750; letter-spacing:-.042em; line-height:1.15; }
+      #content-col > header p { margin-top:5px; letter-spacing:0; }
+      #inputs-section, #results-section > section, #results-section > div,
+      #layout aside > section, #layout aside > div {
+        border-color:var(--wellness-border);
+        box-shadow:var(--wellness-shadow);
+      }
+      #inputs-section { background:var(--wellness-surface); border-radius:24px; }
+      #inputs-section > div:first-child { padding-bottom:20px; }
+      #inputs-section h2 { letter-spacing:-.025em; }
+      #results-section > section { border-radius:22px; }
+      #bmi-panel { border-radius:18px; background:var(--wellness-soft); border-color:var(--wellness-border); }
+      #inputs-section input[type="number"], #inputs-section select {
+        min-height:44px; border-radius:12px; border-color:var(--wellness-border);
+        background:var(--wellness-surface); font-variant-numeric:tabular-nums;
+      }
+      #inputs-section input[type="number"]:focus-visible, #inputs-section select:focus-visible {
+        outline:2px solid var(--wellness-brand); outline-offset:2px;
+      }
+      #inputs-section button, #content-col > header button, #inputs-section label:has(input[type="radio"]) {
+        transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;
+      }
+      #inputs-section button:active, #content-col > header button:active { transform:scale(.985); }
+      #btn-print { background:var(--wellness-brand); color:#fff; border-radius:12px; min-height:38px; }
+      html.dark #btn-print { background:#376F57; }
+      #content-col > header > div:first-child {
+        background:linear-gradient(145deg,#2F6755,#203B34);
+        box-shadow:0 5px 15px rgba(47,103,85,.18);
+        border-radius:14px;
+      }
+      #sticky-bar { background:var(--wellness-surface); border-color:var(--wellness-border); }
+      #sb-nav { scrollbar-width:none; }
+      #proj-chart-wrap { border-radius:16px; overflow:hidden; }
+      #results-section .text-3xl, #results-section .text-4xl {
+        font-variant-numeric:tabular-nums; letter-spacing:-.045em;
+      }
+      #info-pop, #copy-fallback > div { background:var(--wellness-surface); border-color:var(--wellness-border); }
+    }
+    @media screen and (min-width:1280px) {
+      #content-col { display:flex; flex-direction:column; gap:28px; }
+      #content-col > * { margin-top:0 !important; }
+      #results-section { display:flex; flex-direction:column; gap:22px; }
+      #results-section > * { margin-top:0 !important; }
+    }
+    @media screen and (max-width:639px) {
+      body { padding:18px 12px 72px; }
+      #content-col { gap:18px; }
+      #content-col > header { flex-wrap:wrap; padding:4px 2px 12px; }
+      #content-col > header h1 { font-size:19px; }
+      #content-col > header p { white-space:normal; line-height:1.45; }
+      #inputs-section { padding:20px 16px; border-radius:20px; }
+      #inputs-section > div:first-child { align-items:flex-start; }
+      #inputs-section > div:first-child > div { width:100%; }
+      #inputs-section > div:first-child > div button { flex-grow:1; justify-content:center; }
+      #results-section > section { border-radius:20px; }
+      #proj-chart { min-height:190px; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      #inputs-section button, #content-col > header button { transition:none !important; transform:none !important; }
+    }
+
     html.dark { color-scheme: dark; }
     .fa-ico { display: inline-block; width: 1em; height: 1em; vertical-align: -0.125em; flex-shrink: 0; overflow: visible; }
     summary { list-style: none; }
@@ -127,8 +215,8 @@
         <i data-fa="calculator"></i>
       </div>
       <div class="min-w-0 flex-1">
-        <h1 class="text-lg sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">Calculator Nutriție &amp; Necesar Zilnic</h1>
-        <p class="text-xs sm:text-sm text-slate-500 truncate">Necesar caloric, macronutrienți și evoluția greutății · Mifflin-St Jeor &amp; ISSN</p>
+        <h1 class="text-lg sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">Nutriție <span class="font-medium text-slate-600">/ Calculator nutrițional</span></h1>
+        <p class="text-xs sm:text-sm text-slate-500 truncate">Plan alimentar personalizat, macronutrienți și evoluția greutății</p>
       </div>
       <div class="flex-none flex items-center gap-2">
       <button id="btn-lang" type="button" class="text-xs px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 shadow-sm font-semibold" aria-label="EN – English" lang="en">
@@ -161,7 +249,7 @@
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
         <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
           <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 text-sm"><i data-fa="user"></i></span>
-          Date Biometrice & Obiectiv
+          Profil și obiectiv
         </h2>
         <div class="flex flex-wrap gap-2">
           <button id="btn-copy" type="button" class="text-xs px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 flex items-center gap-1.5">
