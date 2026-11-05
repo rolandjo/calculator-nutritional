@@ -3,7 +3,8 @@
 //   node build.mjs sites   (font din Google Fonts, fișier mai mic → ../google-sites/)
 //   node build.mjs github  ../index.html   (offline + PWA: manifest, service worker, iconițe — pentru GitHub Pages)
 import { readFileSync, writeFileSync, cpSync, existsSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
+import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import colors from 'tailwindcss/colors.js';
 
@@ -83,7 +84,10 @@ html = html.replace('/*__COLOR_VARS__*/', `:root{${light.join(';')}}@media scree
 writeFileSync('.tw-content.html', html);
 writeFileSync('.tw-in.css', '@tailwind base;@tailwind components;@tailwind utilities;');
 writeFileSync('.tw.config.cjs', `module.exports = ${JSON.stringify({ content: ['./.tw-content.html'], theme: { colors: twColors } })};`);
-execFileSync('npx', ['tailwindcss', '-c', '.tw.config.cjs', '-i', '.tw-in.css', '-o', '.tw-out.css', '--minify'], { stdio: 'inherit' });
+// CLI-ul Tailwind rulat direct cu Node (nu prin `npx`): pe Windows npx este npx.cmd, pe care
+// Node ≥ 18.20 / 20.12 nu-l mai poate porni cu execFileSync fără shell (spawnSync npx ENOENT/EINVAL).
+const twCli = join(dirname(createRequire(import.meta.url).resolve('tailwindcss/package.json')), 'lib', 'cli.js');
+execFileSync(process.execPath, [twCli, '-c', '.tw.config.cjs', '-i', '.tw-in.css', '-o', '.tw-out.css', '--minify'], { stdio: 'inherit' });
 html = html.replace('/*__TAILWIND__*/', readFileSync('.tw-out.css', 'utf8'));
 
 writeFileSync(OUT, html);
