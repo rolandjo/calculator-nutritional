@@ -168,9 +168,9 @@ function setupReferencePolish(){
  const meals=$('meals-section'); replaceOutline(meals,'utensils');
  const mealsTitle=meals.querySelector('h3');mealsTitle.childNodes.forEach(n=>{if(n.nodeType===3&&n.textContent.trim())n.textContent='Distribuția meselor';});
  mealsTitle.after(h('p',{id:'meal-caption'}));
- const mealDetails=h('details',{id:'meal-details'},h('summary',null,'Detalii despre mese'));
- mealDetails.append(meals.querySelector('[role="group"]'),$('meals-note'));
- meals.append(mealDetails);
+ // Meal count stays visible above the meals; the split note stays below them.
+ const mealCount=meals.querySelector('[role="group"]'); mealCount.id='meal-count';
+ $('meals-breakdown').before(mealCount); $('meals-breakdown').after($('meals-note'));
  const intro=$('calculation-intro');replaceOutline(intro,'flask');
  const links=h('nav',{id:'explanation-links','aria-label':'Detalii de calcul'});
  for(const [id,label,name] of [['formulas','Detalii și formule','book'],['projection-details','Interpretarea rezultatelor','layers'],['references','Surse științifice','external']]) {

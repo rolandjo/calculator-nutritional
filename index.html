@@ -593,7 +593,7 @@
  #projection-delta strong { display:block; color:#1e5937; font-size:13px; font-weight:700; }
  #projection-delta span { display:block; color:#425844; font-size:11px; margin-top:1px; }
  #projection-details { border:0; padding-top:0; margin-top:6px; }
- #projection-details > summary, #meal-details > summary { font-size:11px; color:var(--wellness-muted); font-weight:450; }
+ #projection-details > summary { font-size:11px; color:var(--wellness-muted); font-weight:450; }
  #projection-options { padding:8px 0; }
  .comparison-toggle { display:flex; gap:8px; align-items:center; margin-top:10px; font-size:12px; }
  #projection-options > summary { margin-bottom:8px; }
@@ -610,8 +610,8 @@
  #meals-breakdown .meal-macros > summary { grid-column:4; grid-row:1; margin:0; font-size:12px; min-width:18px; min-height:26px; line-height:26px; text-align:center; color:#6a7a6b; }
  #meals-breakdown .meal-macros > summary::after { float:none; margin:0; font-size:13px; }
  #meals-breakdown .meal-macros[open] > .meal-macro-values { display:flex; flex-wrap:wrap; column-gap:14px; row-gap:4px; grid-column:1 / -1; margin:0; font-size:11px; }
- #meal-details { margin-top:auto; padding-top:4px; }
- #meal-details [role="group"] { margin-top:10px; }
+ #meal-count { display:flex; flex-wrap:wrap; width:100%; }
+ #meal-count .btn-meal { flex:1 1 auto; white-space:nowrap; padding-inline:8px; }
  #meals-note { margin-top:10px; font-size:11px; line-height:1.5; }
  #calculation-intro { display:grid; grid-template-columns:26px minmax(0,1.45fr) minmax(210px,1fr); gap:15px; align-items:start; padding:17px 20px; }
  #calculation-intro > svg { width:26px; height:28px; color:#286749; }
@@ -3999,9 +3999,9 @@ function setupReferencePolish(){
  const meals=$('meals-section'); replaceOutline(meals,'utensils');
  const mealsTitle=meals.querySelector('h3');mealsTitle.childNodes.forEach(n=>{if(n.nodeType===3&&n.textContent.trim())n.textContent='Distribuția meselor';});
  mealsTitle.after(h('p',{id:'meal-caption'}));
- const mealDetails=h('details',{id:'meal-details'},h('summary',null,'Detalii despre mese'));
- mealDetails.append(meals.querySelector('[role="group"]'),$('meals-note'));
- meals.append(mealDetails);
+ // Meal count stays visible above the meals; the split note stays below them.
+ const mealCount=meals.querySelector('[role="group"]'); mealCount.id='meal-count';
+ $('meals-breakdown').before(mealCount); $('meals-breakdown').after($('meals-note'));
  const intro=$('calculation-intro');replaceOutline(intro,'flask');
  const links=h('nav',{id:'explanation-links','aria-label':'Detalii de calcul'});
  for(const [id,label,name] of [['formulas','Detalii și formule','book'],['projection-details','Interpretarea rezultatelor','layers'],['references','Surse științifice','external']]) {
