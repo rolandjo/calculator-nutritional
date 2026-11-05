@@ -3,7 +3,8 @@
 //   node build.mjs sites   (font din Google Fonts, fișier mai mic → ../google-sites/)
 //   node build.mjs github  ../index.html   (offline + PWA: manifest, service worker, iconițe — pentru GitHub Pages)
 import { readFileSync, writeFileSync, cpSync, existsSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
+import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import colors from 'tailwindcss/colors.js';
 
@@ -58,13 +59,15 @@ const PALETTES = ['slate', 'red', 'rose', 'pink', 'orange', 'amber', 'lime', 'em
 // utilities so the nutritional calculations, chart logic and UI selectors stay intact.
 const wellnessPalettes = {
   indigo: {50:'#F1F7F2',100:'#DCEAE0',200:'#C1DACA',300:'#9CC4A9',400:'#73A58A',500:'#4B856B',600:'#2F6755',700:'#275744',800:'#203B34',900:'#19352D',950:'#10251E'},
-  slate:  {50:'#F7F6F2',100:'#EFEEE8',200:'#DFE2D9',300:'#CBD2C7',400:'#A0AFA4',500:'#74867C',600:'#576B61',700:'#40534A',800:'#2C4037',900:'#1C3028',950:'#10221C'}
+  // 500/600 darkened vs. the first draft (#74867C/#576B61) so small muted text meets WCAG AA (≥4.5:1) on canvas and tinted panels
+  slate:  {50:'#F7F6F2',100:'#EFEEE8',200:'#DFE2D9',300:'#CBD2C7',400:'#A0AFA4',500:'#5B6D63',600:'#4D6157',700:'#3D5047',800:'#2C4037',900:'#1C3028',950:'#10221C'}
 };
 
 const SHADES = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'];
 const rgb = hex => { const n = parseInt(hex.slice(1), 16); return `${n >> 16} ${(n >> 8) & 255} ${n & 255}`; };
-const light = ['--c-white:255 255 255'];
-const dark = [`--c-white:${rgb(colors.slate[900])}`];
+// Surfaces: warm paper white in light mode, deep botanical green in dark mode (was Tailwind slate-900)
+const light = [`--c-white:${rgb('#FFFEFB')}`];
+const dark = [`--c-white:${rgb('#192A22')}`];
 const twColors = { transparent: 'transparent', current: 'currentColor', black: '#000', white: 'rgb(var(--c-white) / <alpha-value>)' };
 for (const p of PALETTES) {
   twColors[p] = {};
@@ -81,7 +84,10 @@ html = html.replace('/*__COLOR_VARS__*/', `:root{${light.join(';')}}@media scree
 writeFileSync('.tw-content.html', html);
 writeFileSync('.tw-in.css', '@tailwind base;@tailwind components;@tailwind utilities;');
 writeFileSync('.tw.config.cjs', `module.exports = ${JSON.stringify({ content: ['./.tw-content.html'], theme: { colors: twColors } })};`);
-execFileSync('npx', ['tailwindcss', '-c', '.tw.config.cjs', '-i', '.tw-in.css', '-o', '.tw-out.css', '--minify'], { stdio: 'inherit' });
+// CLI-ul Tailwind rulat direct cu Node (nu prin `npx`): pe Windows npx este npx.cmd, pe care
+// Node ≥ 18.20 / 20.12 nu-l mai poate porni cu execFileSync fără shell (spawnSync npx ENOENT/EINVAL).
+const twCli = join(dirname(createRequire(import.meta.url).resolve('tailwindcss/package.json')), 'lib', 'cli.js');
+execFileSync(process.execPath, [twCli, '-c', '.tw.config.cjs', '-i', '.tw-in.css', '-o', '.tw-out.css', '--minify'], { stdio: 'inherit' });
 html = html.replace('/*__TAILWIND__*/', readFileSync('.tw-out.css', 'utf8'));
 
 writeFileSync(OUT, html);
