@@ -172,6 +172,39 @@
         </div>
       </div>
 
+      <!-- IMC și greutate de referință (live) -->
+      <div id="bmi-panel" class="p-4 rounded-xl border border-slate-200 bg-white grid grid-cols-1 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-x-6 gap-y-4" aria-live="polite">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5"><i data-fa="weight-scale" class="text-indigo-600"></i> Indice de masă corporală</span>
+            <span id="bmi-badge" class="px-2 py-0.5 rounded text-[11px] font-bold whitespace-nowrap bg-slate-200 text-slate-800">–</span>
+          </div>
+          <div class="flex items-baseline gap-2"><span id="bmi-value" class="text-3xl font-extrabold text-slate-900 tabular-nums">–</span><span class="text-xs text-slate-500">kg/m²</span></div>
+          <div class="relative pt-1.5 pb-4">
+            <div class="flex h-2.5 rounded-full overflow-hidden">
+              <span class="bg-sky-400" style="width:14%"></span><span class="bg-emerald-500" style="width:26%"></span><span class="bg-amber-400" style="width:20%"></span><span class="bg-orange-500" style="width:20%"></span><span class="bg-red-500" style="width:20%"></span>
+            </div>
+            <span id="bmi-marker" class="absolute top-0 w-1.5 h-[22px] -ml-[3px] rounded-full bg-slate-900 ring-2 ring-white transition-all duration-300" style="left:0%"></span>
+            <div class="absolute inset-x-0 bottom-0 text-[10px] text-slate-500 tabular-nums">
+              <span class="absolute -translate-x-1/2" style="left:14%">18,5</span><span class="absolute -translate-x-1/2" style="left:40%">25</span><span class="absolute -translate-x-1/2" style="left:60%">30</span><span class="absolute -translate-x-1/2" style="left:80%">35</span>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-2.5 text-sm">
+          <div>
+            <p class="text-xs text-slate-600">Greutate sănătoasă pentru <span id="bmi-height-lbl">–</span> (IMC 18,5–24,9)</p>
+            <p><strong id="bmi-range" class="text-slate-900 tabular-nums">–</strong> <span id="bmi-diff" class="text-xs text-slate-600"></span></p>
+          </div>
+          <div id="ibw-block">
+            <p class="text-xs text-slate-600">Greutate „ideală” după formulele clinice (<span id="ibw-sex">–</span>)</p>
+            <div id="ibw-list" class="flex flex-wrap gap-1.5 mt-1"></div>
+          </div>
+          <p id="ibw-na" class="hidden text-xs text-slate-600">Formulele de greutate „ideală” sunt definite pentru înălțimi de peste 152 cm.</p>
+          <p id="bmi-age-note" class="hidden text-xs p-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-900">Peste 65 de ani, riscul de mortalitate crește la IMC sub ~23, iar supraponderea ușoară (IMC 25–30) nu este asociată cu un risc mai mare; intervalul optim este ceva mai sus decât la adulții tineri. <a href="#ref-25" class="text-indigo-600 hover:underline">[25]</a></p>
+          <p class="text-[11px] text-slate-500">IMC nu deosebește grăsimea de masa musculară; la sportivi sau la vârstnici interpretează-l cu prudență. Surse: <a href="#ref-21" class="text-indigo-600 hover:underline">[21]</a> <a href="#ref-24" class="text-indigo-600 hover:underline">[24]</a> <a href="#ref-25" class="text-indigo-600 hover:underline">[25]</a></p>
+        </div>
+      </div>
+
       <!-- Greutate de Referință Opțională -->
       <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
         <div class="flex items-center justify-between gap-4">
@@ -828,6 +861,22 @@
             </div>
             <p class="text-xs text-slate-600">Limitele de ritm din calculul invers (1% / 0,5% pe săptămână) se aplică pe țesut, fără apa pierdută din glicogen. Răspunsul individual variază mult (studiile raportează ~65–300 kcal/zi adaptare); valorile sunt orientative.</p>
           </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 md:col-span-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-indigo-700">8. IMC și greutatea de referință</span>
+              <span class="text-[11px] bg-slate-200 text-slate-700 font-semibold px-2 py-0.5 rounded">OMS · Devine</span>
+            </div>
+            <p class="text-[11px] text-slate-500">Surse: <a href="#ref-21" class="text-indigo-600 hover:underline">[21]</a> <a href="#ref-24" class="text-indigo-600 hover:underline">[24]</a> <a href="#ref-25" class="text-indigo-600 hover:underline">[25]</a></p>
+            <div class="p-2.5 bg-white rounded border border-slate-200 font-mono text-[11px] text-slate-800 space-y-1">
+              <p><strong>IMC</strong> = greutate (kg) ÷ înălțime² (m); categorii OMS: &lt;18,5 · 18,5–24,9 · 25–29,9 · 30–34,9 · 35–39,9 · ≥40</p>
+              <p><strong>Greutate sănătoasă</strong> = 18,5 × h² … 24,9 × h²</p>
+              <p><strong>Greutate „ideală”</strong> (i = inci peste 152,4 cm = (cm − 152,4) ÷ 2,54):</p>
+              <p>Devine: B 50 + 2,3·i · F 45,5 + 2,3·i &nbsp;|&nbsp; Robinson: B 52 + 1,9·i · F 49 + 1,7·i</p>
+              <p>Miller: B 56,2 + 1,41·i · F 53,1 + 1,36·i &nbsp;|&nbsp; Hamwi: B 48 + 2,7·i · F 45,5 + 2,2·i</p>
+            </div>
+            <p class="text-xs text-slate-600">Formulele de greutate „ideală” provin din tabele înălțime–greutate și sunt folosite mai ales la dozarea medicamentelor; dau rezultate apropiate, de aceea afișăm și media lor. Vârsta nu modifică pragurile OMS; pentru 65+ ani se afișează o notă informativă.</p>
+          </div>
         </div>
 
       </details>
@@ -841,7 +890,7 @@
               Referințe științifice
             </h2>
             <p class="text-xs sm:text-sm text-slate-600 mt-1">
-              Sursele pe care se sprijină formulele și pragurile din calculator (21 de referințe + 2 suplimentare). <span class="text-indigo-600 font-semibold group-open:hidden">Apasă pentru a afișa.</span>
+              Sursele pe care se sprijină formulele și pragurile din calculator (23 de referințe + 2 suplimentare). <span class="text-indigo-600 font-semibold group-open:hidden">Apasă pentru a afișa.</span>
             </p>
           </div>
           <span class="text-slate-600 mt-1 transition-transform group-open:rotate-180"><i data-fa="chevron-down"></i></span>
@@ -913,6 +962,8 @@
             <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-700">Indice de masă corporală (IMC)</h4>
             <ul class="space-y-1.5 text-xs text-slate-600 leading-relaxed">
               <li id="ref-21" class="scroll-mt-16 target:bg-amber-50 rounded"><span class="font-semibold text-slate-800">[21]</span> World Health Organization. Global Health Observatory – Body mass index (BMI). (subponderal: IMC &lt; 18,5) <a href="https://www.who.int/data/gho/data/themes/topics/topic-details/GHO/body-mass-index" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline break-all">who.int – GHO: Body mass index</a></li>
+              <li id="ref-24" class="scroll-mt-16 target:bg-amber-50 rounded"><span class="font-semibold text-slate-800">[24]</span> Pai MP, Paloucek FP. The origin of the “ideal” body weight equations. Ann Pharmacother. 2000;34(9):1066–1069. (formulele Devine, Robinson, Miller, Hamwi; rezultate similare) <a href="https://doi.org/10.1345/aph.19381" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline break-all">doi:10.1345/aph.19381</a></li>
+              <li id="ref-25" class="scroll-mt-16 target:bg-amber-50 rounded"><span class="font-semibold text-slate-800">[25]</span> Winter JE, MacInnis RJ, Wattanapenpaiboon N, Nowson CA. BMI and all-cause mortality in older adults: a meta-analysis. Am J Clin Nutr. 2014;99(4):875–890. (≥65 ani: risc mai mare la IMC &lt; 23; supraponderea nu crește riscul) <a href="https://doi.org/10.3945/ajcn.113.068122" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline break-all">doi:10.3945/ajcn.113.068122</a></li>
             </ul>
           </div>
           <div class="space-y-1.5">
@@ -1434,6 +1485,56 @@
     }
 
     // ---------- Calcul principal ----------
+    // ---------- IMC și greutate de referință (panou live) ----------
+    const BMI_CATS = [
+      [18.5, 'Subponderal', 'bg-sky-100 text-sky-900'],
+      [25, 'Greutate normală', 'bg-emerald-100 text-emerald-900'],
+      [30, 'Supraponderal', 'bg-amber-100 text-amber-900'],
+      [35, 'Obezitate gr. I', 'bg-orange-100 text-orange-900'],
+      [40, 'Obezitate gr. II', 'bg-red-100 text-red-900'],
+      [Infinity, 'Obezitate gr. III', 'bg-red-200 text-red-900']
+    ];
+    const IBW = {
+      male:   [['Devine', 50, 2.3], ['Robinson', 52, 1.9], ['Miller', 56.2, 1.41], ['Hamwi', 48, 2.7]],
+      female: [['Devine', 45.5, 2.3], ['Robinson', 49, 1.7], ['Miller', 53.1, 1.36], ['Hamwi', 45.5, 2.2]]
+    };
+    function bmiInfo(weight, heightCm, gender) {
+      const m = heightCm / 100;
+      const bmi = weight / (m * m);
+      const cat = BMI_CATS.find(c => bmi < c[0]);
+      const lo = 18.5 * m * m, hi = 24.9 * m * m;
+      const inches = (heightCm - 152.4) / 2.54;
+      const ibw = inches >= 0 ? IBW[gender].map(([n, b, k]) => [n, b + k * inches]) : null;
+      const ibwMean = ibw ? ibw.reduce((a, x) => a + x[1], 0) / ibw.length : null;
+      return { bmi, cat, lo, hi, ibw, ibwMean };
+    }
+    function renderBmiPanel(valid) {
+      const panel = $('bmi-panel');
+      panel.classList.toggle('opacity-40', !valid);
+      if (!valid) return;
+      const r = bmiInfo(state.weight, state.height, state.gender);
+      $('bmi-value').textContent = r.bmi.toLocaleString('ro-RO', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      const badge = $('bmi-badge');
+      badge.textContent = r.cat[1];
+      badge.className = `px-2 py-0.5 rounded text-[11px] font-bold whitespace-nowrap ${r.cat[2]}`;
+      const pos = Math.min(100, Math.max(0, (r.bmi - 15) / 25 * 100));
+      $('bmi-marker').style.left = pos + '%';
+      $('bmi-height-lbl').textContent = `${state.height.toLocaleString('ro-RO')} cm`;
+      $('bmi-range').textContent = `${fmt1(r.lo)} – ${fmt1(r.hi)} kg`;
+      const d = $('bmi-diff');
+      if (state.weight > r.hi) d.textContent = `(cu ${fmt1(state.weight - r.hi)} kg peste limita superioară)`;
+      else if (state.weight < r.lo) d.textContent = `(cu ${fmt1(r.lo - state.weight)} kg sub limita inferioară)`;
+      else d.textContent = '(greutatea actuală este în interval)';
+      $('ibw-block').classList.toggle('hidden', !r.ibw);
+      $('ibw-na').classList.toggle('hidden', Boolean(r.ibw));
+      if (r.ibw) {
+        $('ibw-sex').textContent = state.gender === 'male' ? 'bărbat' : 'femeie';
+        const chip = (label, val, strongCls) => h('span', { class: `px-2 py-1 rounded-lg text-xs border tabular-nums ${strongCls || 'bg-slate-50 border-slate-200 text-slate-700'}` }, `${label} `, strong(`${fmt1(val)} kg`));
+        $('ibw-list').replaceChildren(...r.ibw.map(([n, v]) => chip(n, v)), chip('Medie', r.ibwMean, 'bg-indigo-50 border-indigo-200 text-indigo-900'));
+      }
+      $('bmi-age-note').classList.toggle('hidden', state.age < 65);
+    }
+
     function calculate(options) {
       instantRender = Boolean(options && options.instant) || instantRender;
       try {
@@ -1444,7 +1545,8 @@
     }
 
     function runCalculation() {
-      if (!validateInputs()) return false;
+      if (!validateInputs()) { renderBmiPanel(false); return false; }
+      renderBmiPanel(true);
 
       saveState();
 
@@ -2129,6 +2231,7 @@
         row('Vârstă', `${state.age} ani`),
         row('Înălțime', `${state.height} cm`),
         row('Greutate actuală', `${state.weight} kg`),
+        (() => { const r = bmiInfo(state.weight, state.height, state.gender); return row('IMC', `${fmt1(r.bmi)} kg/m² — ${r.cat[1]}; interval sănătos ${fmt1(r.lo)}–${fmt1(r.hi)} kg${r.ibw ? `; greutate ideală (medie formule) ${fmt1(r.ibwMean)} kg` : ''}`); })(),
         row('Greutate referință', state.useRefWeight ? `${state.refWeight} kg` : 'Nefolosită (greutate reală)'),
         row('Nivel activitate', ACTIVITY_LABELS[state.activity] || String(state.activity)),
         row('Obiectiv selectat', selectedGoalDescription()),
