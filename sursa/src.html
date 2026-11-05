@@ -90,30 +90,19 @@
       <span>Fișa este pregătită. Apasă <strong>Ctrl+P</strong> (Windows) sau <strong>⌘P</strong> (Mac) și alege „Salvează ca PDF” sau imprimanta.</span>
     </div>
 
-    <!-- Comutator temă -->
-    <div class="flex justify-end no-print -mb-6">
-      <button id="btn-theme" type="button" class="text-xs px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 shadow-sm" aria-label="Schimbă tema">
+    <!-- Header compact (cu comutatorul de temă) -->
+    <header class="no-print flex items-center gap-3">
+      <div class="flex-none inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-600 text-white text-lg shadow-sm">
+        <i data-fa="calculator"></i>
+      </div>
+      <div class="min-w-0 flex-1">
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">Calculator Nutriție &amp; Necesar Zilnic</h1>
+        <p class="text-xs sm:text-sm text-slate-500 truncate">Necesar caloric, macronutrienți și evoluția greutății · Mifflin-St Jeor &amp; ISSN</p>
+      </div>
+      <button id="btn-theme" type="button" class="flex-none text-xs px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 shadow-sm" aria-label="Schimbă tema">
         <span id="theme-icon" class="inline-flex"></span>
         <span id="theme-label">Auto</span>
       </button>
-    </div>
-
-    <!-- Header -->
-    <header class="text-center space-y-3 no-print">
-      <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600 text-white text-xl shadow-md">
-        <i data-fa="calculator"></i>
-      </div>
-      <div>
-        <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-semibold uppercase tracking-wider">
-          Model Personalizat Mifflin-St Jeor & ISSN
-        </div>
-      </div>
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-        Calculator Nutriție & Necesar Zilnic
-      </h1>
-      <p class="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base">
-        Determinarea estimativă a necesarului caloric și a macronutrienților, calibrată pe baza parametrilor biologici, a nivelului de activitate și a obiectivului urmărit.
-      </p>
     </header>
 
     <!-- Sumar Date Intrare (Vizibil doar la tipărire) -->
