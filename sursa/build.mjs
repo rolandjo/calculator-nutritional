@@ -45,7 +45,7 @@ html = html.replace('/*__FONTS__*/', fonts);
 
 // ---------- PWA (doar varianta GitHub Pages) ----------
 if (VARIANT === 'github') {
-  html = html.replace('<!--__PWA_HEAD__-->', '<link rel="manifest" href="manifest.webmanifest">\n  <meta name="theme-color" content="#4f46e5">\n  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">\n  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">');
+  html = html.replace('<!--__PWA_HEAD__-->', '<link rel="manifest" href="manifest.webmanifest">\n  <meta name="theme-color" content="#2F6755">\n  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">\n  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">');
   html = html.replace('/*__PWA_JS__*/', "if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); }); }");
 } else {
   html = html.replace('<!--__PWA_HEAD__-->', '').replace('/*__PWA_JS__*/', '');
@@ -53,6 +53,14 @@ if (VARIANT === 'github') {
 
 // ---------- Culori ca variabile CSS (mod întunecat = scala inversată) ----------
 const PALETTES = ['slate', 'red', 'rose', 'pink', 'orange', 'amber', 'lime', 'emerald', 'teal', 'sky', 'blue', 'indigo', 'violet'];
+
+// Botanical Precision: wellness-oriented semantic remapping. Maintain legacy Tailwind
+// utilities so the nutritional calculations, chart logic and UI selectors stay intact.
+const wellnessPalettes = {
+  indigo: {50:'#F1F7F2',100:'#DCEAE0',200:'#C1DACA',300:'#9CC4A9',400:'#73A58A',500:'#4B856B',600:'#2F6755',700:'#275744',800:'#203B34',900:'#19352D',950:'#10251E'},
+  slate:  {50:'#F7F6F2',100:'#EFEEE8',200:'#DFE2D9',300:'#CBD2C7',400:'#A0AFA4',500:'#74867C',600:'#576B61',700:'#40534A',800:'#2C4037',900:'#1C3028',950:'#10221C'}
+};
+
 const SHADES = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'];
 const rgb = hex => { const n = parseInt(hex.slice(1), 16); return `${n >> 16} ${(n >> 8) & 255} ${n & 255}`; };
 const light = ['--c-white:255 255 255'];
@@ -61,8 +69,8 @@ const twColors = { transparent: 'transparent', current: 'currentColor', black: '
 for (const p of PALETTES) {
   twColors[p] = {};
   SHADES.forEach((s, i) => {
-    light.push(`--c-${p}-${s}:${rgb(colors[p][s])}`);
-    dark.push(`--c-${p}-${s}:${rgb(colors[p][SHADES[SHADES.length - 1 - i]])}`);
+    light.push(`--c-${p}-${s}:${rgb((wellnessPalettes[p] || colors[p])[s])}`);
+    dark.push(`--c-${p}-${s}:${rgb((wellnessPalettes[p] || colors[p])[SHADES[SHADES.length - 1 - i]])}`);
     twColors[p][s] = `rgb(var(--c-${p}-${s}) / <alpha-value>)`;
   });
 }
