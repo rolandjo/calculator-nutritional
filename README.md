@@ -13,10 +13,10 @@ Calculator web pentru necesarul caloric zilnic, macronutrienți, repartiția pe 
   - *După țintă și termen* – calcul invers: greutatea dorită + termen (săptămâni sau dată) → aportul zilnic necesar, cu plafonare la limite sigure și termen minim recomandat
 - **Macronutrienți** – proteine (g/kg, opțional pe greutate de referință), grăsimi (% din calorii), carbohidrați din restul bugetului; grafic donut; notă Keto sub 50 g carbohidrați/zi
 - **Fibre și lichide** – ținte orientative
-- **Repartiție pe mese** – 3, 4 sau 5 mese, distribuție ponderată
+- **Repartiție pe mese** – 3, 4 sau 5 mese (distribuție ponderată), plus 2 mese în post intermitent 18:6 (fereastră de 6 ore) și 1 masă (OMAD), cu note și surse
 - **Evoluția greutății** – model dinamic zi cu zi (Hall et al., Lancet 2011, simplificat): adaptare metabolică selectabilă, faza inițială apă + glicogen, greutate de echilibru, grafic și tabel
 - **IMC și greutate de referință** – categoria OMS, intervalul sănătos pentru înălțime, greutatea „ideală” (Devine, Robinson, Miller, Hamwi), notă pentru 65+ ani
-- **Formule și referințe științifice** – secțiuni restrânse, cu trimiteri [n] la 23 de surse + 2 suplimentare
+- **Formule și referințe științifice** – secțiuni restrânse, cu trimiteri [n] la 26 de surse + 2 suplimentare
 - **Interfață** – rezumat fix în dreapta pe ecrane late, navigare pe secțiuni pe telefon/tabletă, grafic interactiv (mouse, atingere, tastatură), explicații „i” cu trimiteri la surse
 - **Română / English** – comutator în antet (sau `?lang=en` în adresă)
 - **Accesibilitate** – verificată cu axe-core (WCAG 2.1 AA): contrast, focus vizibil, etichete

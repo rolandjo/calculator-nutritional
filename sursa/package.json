@@ -1,6 +1,6 @@
 {
   "name": "calculator-nutritional",
-  "version": "16.0.0",
+  "version": "17.0.0",
   "private": true,
   "description": "Calculator nutrițional: BMR Mifflin-St Jeor, TDEE, macronutrienți, IMC, mese, proiecția greutății (model dinamic Hall), calcul invers după țintă și termen; RO/EN, PWA.",
   "license": "MIT",
