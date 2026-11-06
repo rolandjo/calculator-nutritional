@@ -3871,7 +3871,7 @@ Object.assign(I18N,{
   'Detalii de calcul':'Calculation details'
   ,'Fibre, lichide și monitorizare':'Fibre, fluids and monitoring'
   ,'(Metabolism bazal)':'(Basal metabolism)', '(Necesar total)':'(Daily needs)'
- ,'(Indice de masă corporală)':'(Body mass index)'
+ ,'(Indice de masă corporală)':'(Body mass index)', 'Categorie OMS:':'WHO category:'
  ,'Calculator nutrițional gratuit: necesar caloric (BMR, TDEE), macronutrienți, IMC, mese și evoluția greutății, după Mifflin-St Jeor, ISSN și Hall.':'Free nutrition calculator: calorie needs (BMR, TDEE), macronutrients, BMI, meal split and weight trajectory, based on Mifflin-St Jeor, ISSN and Hall.'
 });
 const OUTLINE_PATHS={
@@ -4036,15 +4036,20 @@ function setupReferencePolish(){
   label.replaceChildren(outlineIcon(i?'bolt':'flame'),h('span',{class:'metabolic-title'},h('strong',null,i?'TDEE':'BMR'),' ',h('span',{class:'metabolic-detail'},i?'(Necesar total)':'(Metabolism bazal)')),info);
  });
  // Third card: BMI, mirrored from the profile's BMI panel (value + WHO category).
- const bmiValue=h('span',{id:'energy-bmi-value',class:'text-3xl font-extrabold'},'—');
- energy.append(h('div',{id:'energy-bmi',class:'print-card'},
-  h('span',{class:'metabolic-label'},outlineIcon('scale'),h('span',{class:'metabolic-title'},h('strong',null,'IMC'),' ',h('span',{class:'metabolic-detail'},'(Indice de masă corporală)'))),
-  h('div',{class:'mt-2 flex items-baseline'},bmiValue,h('span',{class:'text-sm'},'kg/m²'))));
+ // Built as a clone of the BMR card so it carries the same classes on screen and in print.
+ const bmiCard=energy.firstElementChild.cloneNode(true); bmiCard.id='energy-bmi';
+ const bmiInfo=bmiCard.querySelector('.info-btn'); bmiInfo.dataset.info='bmi'; bmiInfo.setAttribute('aria-label','Ce arată IMC?'); bmiInfo.setAttribute('aria-expanded','false');
+ bmiCard.querySelector('.metabolic-label').replaceChildren(outlineIcon('scale'),h('span',{class:'metabolic-title'},h('strong',null,'IMC'),' ',h('span',{class:'metabolic-detail'},'(Indice de masă corporală)')),bmiInfo);
+ const bmiValue=bmiCard.querySelector('#val-bmr'); bmiValue.id='energy-bmi-value'; bmiValue.textContent='—';
+ bmiValue.nextElementSibling.textContent='kg/m²';
+ const bmiNote=bmiCard.querySelector(':scope > p'); bmiNote.id='energy-bmi-note';
+ energy.append(bmiCard);
  const syncBmi=()=>{
   const valid=!$('bmi-panel').classList.contains('opacity-40'), text=$('bmi-value').textContent.trim(), n=parseFloat(text.replace(',','.'));
   const ok=valid&&!isNaN(n);
   // The number's colour carries the WHO category; the category name stays available as a tooltip / screen-reader label.
   bmiValue.textContent=ok?text:'—'; bmiValue.dataset.level=ok?(n<18.5?'low':n<25?'ok':n<30?'over':'high'):'';
+  bmiNote.textContent=ok?T('Categorie OMS:')+' '+$('bmi-badge').textContent+'.':'';
   if(ok){bmiValue.title=$('bmi-badge').textContent; bmiValue.setAttribute('aria-label',text+' kg/m², '+bmiValue.title);} else {bmiValue.removeAttribute('title'); bmiValue.removeAttribute('aria-label');}
  };
  new MutationObserver(syncBmi).observe($('bmi-panel'),{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class']});
