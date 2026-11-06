@@ -131,6 +131,10 @@
  #goal-mode { margin:14px 0 4px; }
  #goal-mode [role="group"] { display:flex; width:100%; border-radius:10px; }
  #goal-mode .btn-mode { flex:1 1 0; justify-content:center; min-height:36px; font-size:11px; }
+ /* v43: same segmented style as the Sex selector in the profile */
+ #goal-mode .btn-mode { background:transparent !important; border:0 !important; box-shadow:none !important; color:var(--wellness-ink) !important; font-weight:500; border-radius:10px; }
+ #goal-mode .btn-mode[aria-pressed="true"] { background:linear-gradient(#357652,#255a40) !important; color:#fff !important; box-shadow:0 2px 3px #193c2420 !important; font-weight:600; }
+ #goal-mode .btn-mode svg { color:inherit !important; }
  /* The three option rows share one layout: label on the left, +/− at the right edge, same separators. */
  #goal-options > div:has(> #toggle-advanced), #goal-options > .body-details, #goal-options > .slider-guide { border-top:1px solid var(--wellness-border); padding:0 !important; margin:0 !important; }
  #goal-options > div:has(> #toggle-advanced) { margin-top:14px !important; }
