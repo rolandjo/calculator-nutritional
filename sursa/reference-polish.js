@@ -200,7 +200,7 @@ function setupReferencePolish(){
  const bmiInfo=bmiCard.querySelector('.info-btn'); bmiInfo.dataset.info='bmi'; bmiInfo.setAttribute('aria-label','Ce arată IMC?'); bmiInfo.setAttribute('aria-expanded','false');
  bmiCard.querySelector('.metabolic-label').replaceChildren(outlineIcon('scale'),h('span',{class:'metabolic-title'},h('strong',null,'IMC'),' ',h('span',{class:'metabolic-detail'},'(Indice de masă corporală)')),bmiInfo);
  const bmiValue=bmiCard.querySelector('#val-bmr'); bmiValue.id='energy-bmi-value'; bmiValue.textContent='—';
- bmiValue.nextElementSibling.textContent='kg/m²';
+ bmiValue.nextElementSibling.remove(); // IMC shown as a score, without kg/m²
  const bmiNote=bmiCard.querySelector(':scope > p'); bmiNote.id='energy-bmi-note';
  energy.append(bmiCard);
  const syncBmi=()=>{
@@ -209,7 +209,7 @@ function setupReferencePolish(){
   // The number's colour carries the WHO category; the category name stays available as a tooltip / screen-reader label.
   bmiValue.textContent=ok?text:'—'; bmiValue.dataset.level=ok?(n<18.5?'low':n<25?'ok':n<30?'over':'high'):'';
   bmiNote.textContent=ok?T('Categorie OMS:')+' '+$('bmi-badge').textContent+'.':'';
-  if(ok){bmiValue.title=$('bmi-badge').textContent; bmiValue.setAttribute('aria-label',text+' kg/m², '+bmiValue.title);} else {bmiValue.removeAttribute('title'); bmiValue.removeAttribute('aria-label');}
+  if(ok){bmiValue.title=$('bmi-badge').textContent; bmiValue.setAttribute('aria-label',text+', '+bmiValue.title);} else {bmiValue.removeAttribute('title'); bmiValue.removeAttribute('aria-label');}
  };
  new MutationObserver(syncBmi).observe($('bmi-panel'),{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class']});
  syncBmi();
