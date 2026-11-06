@@ -2,7 +2,7 @@
 
 Calculator web pentru necesarul caloric zilnic, macronutrienți, repartiția pe mese și evoluția estimată a greutății în timp. Totul rulează local în browser: fără server, fără conturi, fără trimiterea datelor nicăieri.
 
-**Aplicația online:** https://rolandjo.github.io/calculator-nutritional/
+**Aplicația online:** https://rolandjo.github.io/calculator-nutritional/ (în engleză: https://rolandjo.github.io/calculator-nutritional/en/)
 
 ## Funcționalități
 
@@ -27,6 +27,7 @@ Calculator web pentru necesarul caloric zilnic, macronutrienți, repartiția pe 
 
 ```
 index.html                        Aplicația completă (un singur fișier, merge offline)
+en/index.html                     Aceeași aplicație în engleză (titlu, descriere și hreflang proprii, pentru motoarele de căutare)
 manifest.webmanifest, sw.js, icons/   PWA (instalare + cache offline pe GitHub Pages)
 google-sites/
   calculator_nutritional_google_sites.html   Variantă mai mică pentru Google Sites (font din Google Fonts)
@@ -44,7 +45,7 @@ Necesită Node.js 18+.
 ```powershell
 cd sursa
 npm install
-npm run build:all     # generează ../index.html (cu PWA) și varianta Google Sites
+npm run build:all     # generează ../index.html și ../en/index.html (cu PWA) și varianta Google Sites
 ```
 
 Modificările se fac în `sursa/src.html` (traducerile EN sunt în obiectul `I18N` și în apelurile `tl(ro, en)`); la o versiune nouă schimbă și `CACHE` din `sursa/pwa/sw.js`; fișierele HTML finale se regenerează cu comanda de mai sus (CSS-ul conține doar clasele Tailwind folosite efectiv).

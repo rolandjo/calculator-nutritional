@@ -1,8 +1,8 @@
 // Build: src.html -> fișier HTML autonom
 //   node build.mjs offline calculator_nutritional.html   (fonturi incluse, merge fără internet, fără PWA)
 //   node build.mjs sites   (font din Google Fonts, fișier mai mic → ../google-sites/)
-//   node build.mjs github  ../index.html   (offline + PWA: manifest, service worker, iconițe — pentru GitHub Pages)
-import { readFileSync, writeFileSync, cpSync, existsSync } from 'node:fs';
+//   node build.mjs github  ../index.html   (offline + PWA: manifest, service worker, iconițe — pentru GitHub Pages; scrie și ../en/index.html)
+import { readFileSync, writeFileSync, cpSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
@@ -47,6 +47,15 @@ if (VARIANT === 'sites') {
 @font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:100 900;src:url(data:font/woff2;base64,${b64('inter-latin-wght-normal.woff2')}) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}`.trim();
 }
 html = html.replace('/*__FONTS__*/', fonts);
+
+// ---------- SEO: o adresă pe limbă (doar GitHub Pages) ----------
+const SITE = 'https://rolandjo.github.io/calculator-nutritional/';
+if (VARIANT === 'github') {
+  const alt = `<link rel="alternate" hreflang="ro" href="${SITE}">\n  <link rel="alternate" hreflang="en" href="${SITE}en/">\n  <link rel="alternate" hreflang="x-default" href="${SITE}">`;
+  html = html.replace('<!--__SEO_HEAD__-->', `<link rel="canonical" href="${SITE}">\n  ${alt}\n  <script>window.__PAGE_LANG = 'ro';</script>`);
+} else {
+  html = html.replace('<!--__SEO_HEAD__-->', '');
+}
 
 // ---------- PWA (doar varianta GitHub Pages) ----------
 if (VARIANT === 'github') {
@@ -97,3 +106,31 @@ html = html.replace('/*__TAILWIND__*/', readFileSync('.tw-out.css', 'utf8'));
 writeFileSync(OUT, html);
 if (VARIANT === 'github' && existsSync('pwa')) cpSync('pwa', dirname(OUT), { recursive: true }); // manifest, sw.js, iconițe lângă index.html
 console.log(`OK [${VARIANT}] -> ${OUT} (${(html.length / 1024).toFixed(0)} KB)`);
+
+// ---------- Pagina în engleză: en/index.html (doar GitHub Pages) ----------
+// Același cod; diferă limba din <html>, titlul, descrierea, canonical și căile relative spre PWA.
+if (VARIANT === 'github') {
+  const esc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pick = (ro) => {
+    const m = html.match(new RegExp(`["']${esc(ro)}["']\\s*:\\s*["']([^"']+)["']`));
+    if (!m) throw new Error('Lipsește traducerea EN pentru: ' + ro);
+    return m[1];
+  };
+  const titleRo = html.match(/<title>([^<]+)<\/title>/)[1];
+  const descRo = html.match(/<meta name="description" content="([^"]+)">/)[1];
+  const one = (src, from, to) => { if (!src.includes(from)) throw new Error('Nu găsesc: ' + from); return src.replace(from, to); };
+  let en = html;
+  en = one(en, '<html lang="ro">', '<html lang="en">');
+  en = one(en, `<title>${titleRo}</title>`, `<title>${pick(titleRo)}</title>`);
+  en = one(en, `<meta name="description" content="${descRo}">`, `<meta name="description" content="${pick(descRo)}">`);
+  en = one(en, `<link rel="canonical" href="${SITE}">`, `<link rel="canonical" href="${SITE}en/">`);
+  en = one(en, "window.__PAGE_LANG = 'ro';", "window.__PAGE_LANG = 'en';");
+  en = one(en, 'href="manifest.webmanifest"', 'href="../manifest.webmanifest"');
+  en = one(en, 'href="icons/icon-192.png"', 'href="../icons/icon-192.png"');
+  en = one(en, 'href="icons/apple-touch-icon.png"', 'href="../icons/apple-touch-icon.png"');
+  en = one(en, "navigator.serviceWorker.register('sw.js')", "navigator.serviceWorker.register('../sw.js')");
+  const enOut = join(dirname(OUT), 'en', 'index.html');
+  mkdirSync(dirname(enOut), { recursive: true });
+  writeFileSync(enOut, en);
+  console.log(`OK [github-en] -> ${enOut} (${(en.length / 1024).toFixed(0)} KB)`);
+}

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nutriție · Calculator nutrițional și plan personalizat</title>
   <meta name="description" content="Calculator nutrițional gratuit: necesar caloric (BMR, TDEE), macronutrienți, IMC, mese și evoluția greutății, după Mifflin-St Jeor, ISSN și Hall.">
+  <!--__SEO_HEAD__-->
   <!--
     Fișier autonom: funcționează offline (fără CDN).
     Iconițe: Font Awesome Free 7 (CC BY 4.0) — https://fontawesome.com/license/free
@@ -1182,6 +1183,8 @@
     // Iconițe folosite dinamic (injectate la build din Font Awesome Free)
     const ICONS = /*__ICONS__*/{};
     let LANG = (() => {
+      // GitHub Pages: each language has its own address (/ and /en/); the page's language wins.
+      if (window.__PAGE_LANG === 'en' || window.__PAGE_LANG === 'ro') return window.__PAGE_LANG;
       try { const q = new URLSearchParams(location.search).get('lang'); if (q === 'en' || q === 'ro') return q; } catch (e) {}
       try { const v = localStorage.getItem('nutri_lang'); if (v === 'en' || v === 'ro') return v; } catch (e) {}
       return 'ro';
@@ -3061,7 +3064,13 @@
       });
     }
     function applyLang(lang, persist) {
-      LANG = lang === 'en' ? 'en' : 'ro';
+      lang = lang === 'en' ? 'en' : 'ro';
+      if (persist && window.__PAGE_LANG && lang !== window.__PAGE_LANG) {
+        try { localStorage.setItem('nutri_lang', lang); } catch (e) {}
+        location.href = (lang === 'en' ? 'en/' : '../') + location.hash;
+        return;
+      }
+      LANG = lang;
       if (persist) { try { localStorage.setItem('nutri_lang', LANG); } catch (e) {} }
       document.documentElement.lang = LANG;
       document.title = LANG === 'en' ? (I18N[ORIG_TITLE] || ORIG_TITLE) : ORIG_TITLE;
