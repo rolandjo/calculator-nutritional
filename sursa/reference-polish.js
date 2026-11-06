@@ -11,7 +11,6 @@ Object.assign(I18N,{
   'Alege tema':'Choose theme','Automat':'Automatic','Deficit':'Deficit','Surplus':'Surplus',
   'BMR (Metabolism bazal)':'BMR (Basal metabolism)','TDEE (Necesar total)':'TDEE (Daily needs)',
   'Detalii de calcul':'Calculation details'
-  ,'Compară modelul simplu':'Compare the simple model'
   ,'Fibre, lichide și monitorizare':'Fibre, fluids and monitoring'
   ,'(Metabolism bazal)':'(Basal metabolism)', '(Necesar total)':'(Daily needs)'
 });
@@ -160,12 +159,10 @@ function setupReferencePolish(){
  subtitle.after(h('p',{id:'projection-caption'}));
  const projectionOptions=h('details',{id:'projection-options'},h('summary',null,'Setări pentru proiecție'));
  projectionOptions.append($('horizon-group')); $('projection-details').insertBefore(projectionOptions,$('projection-details').children[1]);
- const compare=h('input',{type:'checkbox',id:'compare-model'});
- compare.addEventListener('change',()=>document.body.classList.toggle('show-chart-comparison',compare.checked));
- projectionOptions.append(h('label',{class:'comparison-toggle'},compare,h('span',null,'Compară modelul simplu')));
+ // The simple-model dashed line is always drawn; its legend stays under the chart, the hover help goes to the details.
  const chart=$('proj-chart-wrap').parentElement;
- const guideNodes=[...chart.children].slice(1);
- $('projection-details').append(...guideNodes);
+ const chartLegend=$('proj-chart-help').nextElementSibling; chartLegend.id='proj-chart-legend';
+ $('projection-details').append($('proj-chart-help'));
  $('proj-chart-wrap').append(h('div',{id:'projection-delta','aria-hidden':'true'},h('strong',{id:'projection-delta-value'}),h('span',{id:'projection-delta-period'})));
  const meals=$('meals-section'); replaceOutline(meals,'utensils');
  const mealsTitle=meals.querySelector('h3');mealsTitle.childNodes.forEach(n=>{if(n.nodeType===3&&n.textContent.trim())n.textContent='Distribuția meselor';});
