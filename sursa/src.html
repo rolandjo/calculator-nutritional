@@ -1219,7 +1219,8 @@
       targetWeight: 90,
       targetDays: 84,
       atLevel: 0.14,
-      profileConfirmed: false // „Vezi planul meu” apăsat: rezultatul nu mai e un exemplu
+      profileConfirmed: false, // „Vezi planul meu” apăsat: rezultatul nu mai e un exemplu
+      activityChosen: false // nivelul de activitate ales explicit (obligatoriu înainte de confirmare)
     };
 
     const ACTIVITY_FACTORS = [1.2, 1.375, 1.55, 1.725, 1.9];
@@ -1491,6 +1492,7 @@
         // Profiluri salvate înainte de v38 (fără câmp): confirmate dacă datele corporale diferă de exemplul implicit
         state.profileConfirmed = typeof parsed.profileConfirmed === 'boolean' ? parsed.profileConfirmed
           : ['gender', 'age', 'height', 'weight'].some(k => parsed[k] !== undefined && parsed[k] !== DEFAULTS[k]);
+        state.activityChosen = typeof parsed.activityChosen === 'boolean' ? parsed.activityChosen || state.profileConfirmed : state.profileConfirmed;
         if (Number.isFinite(parsed.goalWeight) && parsed.goalWeight >= 30 && parsed.goalWeight <= 300) state.goalWeight = parsed.goalWeight;
         if (parsed.planMode === 'percent' || parsed.planMode === 'target') state.planMode = parsed.planMode;
         if (AT_LEVELS.includes(parsed.atLevel)) state.atLevel = parsed.atLevel;
@@ -1633,13 +1635,13 @@
 
     // ---------- Validare ----------
     // Erori lângă câmp: contur, text imediat sub câmp, aria-invalid + aria-describedby. Mesajul de sus rămâne ca rezumat.
-    function setFieldError(el, msg) {
+    function setFieldError(el, msg, anchor = el) {
       if (!el) return;
       const id = `${el.id}-error`;
       let p = document.getElementById(id);
       const ids = (el.getAttribute('aria-describedby') || '').split(/\s+/).filter(x => x && x !== id);
       if (msg) {
-        if (!p) { p = h('p', { id, class: 'field-error' }); el.after(p); }
+        if (!p) { p = h('p', { id, class: 'field-error' }); anchor.after(p); }
         p.textContent = msg;
         el.setAttribute('aria-invalid', 'true');
         el.setAttribute('aria-describedby', [...ids, id].join(' '));
@@ -2571,6 +2573,8 @@
 
     elActivityRadios.forEach(r => r.addEventListener('change', (e) => {
       state.activity = parseFloat(e.target.value);
+      state.activityChosen = true;
+      if (typeof syncProfileConfirm === 'function') syncProfileConfirm();
       calculate();
     }));
 

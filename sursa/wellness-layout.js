@@ -77,6 +77,8 @@ function arrangeWellnessLayout() {
     I18N[optionText]=(I18N[name]||name)+' · '+(I18N[description]||description);
     select.append(h('option',{value:radio.value},optionText));
   }
+  // Placeholder (first use): any real choice then fires 'change', even for the pre-set level.
+  select.prepend(h('option',{value:'',disabled:'',hidden:''},'Alege nivelul de activitate'));
   const selectedName=h('strong',{id:'activity-name'});
   const selectedDescription=h('span',{id:'activity-description'});
   const selectedView=h('div',{class:'activity-selected','aria-hidden':'true'},icon('person-running'),h('div',null,selectedName,selectedDescription),h('span',{class:'activity-chevron'},'⌄'));
@@ -127,8 +129,9 @@ function arrangeWellnessLayout() {
   pair.after(intro);
   // Re-synchronize the compact select after saved state, reset, or language changes.
   const syncActivity=()=>{
-    select.value=document.querySelector('input[name="activity"]:checked').value;
-    const level=activityLevels.find(item=>item.value===select.value);
+    const checked=document.querySelector('input[name="activity"]:checked').value;
+    select.value=document.documentElement.classList.contains('activity-unchosen')?'':checked;
+    const level=activityLevels.find(item=>item.value===checked);
     selectedName.replaceChildren(T(level.name));
     selectedDescription.replaceChildren(T(level.description));
   };

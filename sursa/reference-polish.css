@@ -63,6 +63,14 @@
  .nav-flash { animation:nav-flash 1.2s ease-out; }
  @keyframes nav-flash { 0%,35% { outline:2px solid var(--wellness-brand); outline-offset:3px; } 100% { outline:2px solid transparent; outline-offset:3px; } }
  #docs-tail { display:none; }
+ /* v45: activity level must be chosen explicitly before the first confirmation */
+ .activity-placeholder { display:none; font-size:14px; font-weight:600; color:var(--wellness-ink); }
+ html.activity-unchosen .activity-selected #activity-name, html.activity-unchosen .activity-selected #activity-description { display:none; }
+ html.activity-unchosen .activity-placeholder { display:block; }
+ html.activity-unchosen .activity-picker { border:1.5px dashed #c28a5a; background:#fbf4ec; }
+ html.dark.activity-unchosen .activity-picker { border-color:#c99a6d; background:#2c2620; }
+ html.activity-unchosen .activity-selected > svg { color:#b5652e; }
+ .activity-picker:has(select[aria-invalid="true"]) { border:1.5px solid #b23a2a !important; }
  /* v38: sample state + confirmation */
  #sample-badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:999px; background:#f3e4d6; color:#7a3f17; font-size:11px; font-weight:700; letter-spacing:.02em; text-transform:none; }
  html.dark #sample-badge { background:#4a3222; color:#f0c9a4; }

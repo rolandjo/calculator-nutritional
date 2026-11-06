@@ -16,6 +16,7 @@ Object.assign(I18N,{
  ,'(Indice de masă corporală)':'(Body mass index)', 'Categorie OMS:':'WHO category:'
  ,'Salvează planul PDF':'Save plan as PDF', 'Copiază':'Copy', 'Vezi distribuția calorică':'Show calorie distribution', 'Ascunde distribuția calorică':'Hide calorie distribution'
  ,'Calculator nutrițional: calorii, macronutrienți și plan de greutate':'Nutrition calculator: calories, macronutrients and weight plan'
+ ,'Alege nivelul de activitate':'Choose your activity level', 'Alege nivelul de activitate din listă.':'Choose your activity level from the list.'
  ,'Exemplu de calcul':'Sample calculation', 'Vezi planul meu':'See my plan', 'Editează profilul':'Edit profile'
  ,'Valori implicite, nu ale tale: completează profilul și obiectivul, apoi apasă „Vezi planul meu”.':'Default values, not yours: fill in your profile and goal, then press “See my plan”.'
  ,'Verifică datele de mai sus; după confirmare, planul se actualizează automat la orice modificare.':'Check the details above; once confirmed, the plan updates automatically whenever you change something.'
@@ -218,6 +219,7 @@ function setupReferencePolish(){
  $('plan-hero').firstElementChild.append(sampleBadge);
  const sampleNote=h('p',{id:'sample-note'},'Valori implicite, nu ale tale: completează profilul și obiectivul, apoi apasă „Vezi planul meu”.');
  $('plan-hero').firstElementChild.after(sampleNote);
+ document.querySelector('.activity-selected > div').append(h('span',{class:'activity-placeholder'},'Alege nivelul de activitate'));
  const confirmBtn=h('button',{type:'button',id:'btn-confirm'},'Vezi planul meu');
  const confirmBlock=h('section',{id:'confirm-block',class:'no-print'},confirmBtn,h('p',null,'Verifică datele de mai sus; după confirmare, planul se actualizează automat la orice modificare.'));
  $('profile-sidebar').append(confirmBlock);
@@ -225,10 +227,16 @@ function setupReferencePolish(){
  window.syncProfileConfirm=()=>{
   const ok=!!state.profileConfirmed;
   document.documentElement.classList.toggle('profile-unconfirmed',!ok);
+  const unchosen=!ok&&!state.activityChosen;
+  document.documentElement.classList.toggle('activity-unchosen',unchosen);
+  if(!unchosen) setFieldError($('activity-select'),null);
+  syncWellnessActivity();
   sampleBadge.hidden=ok; sampleNote.hidden=ok; confirmBlock.hidden=ok;
  };
  confirmBtn.addEventListener('click',()=>{
-  if(!validateInputs()){ const bad=document.querySelector('#profile-sidebar [aria-invalid="true"]'); if(bad) bad.focus(); return; }
+  const needActivity=!state.activityChosen;
+  setFieldError($('activity-select'),needActivity?T('Alege nivelul de activitate din listă.'):null,document.querySelector('.activity-picker'));
+  if(!validateInputs()||needActivity){ const bad=document.querySelector('#profile-sidebar [aria-invalid="true"]'); if(bad) bad.focus(); return; }
   state.profileConfirmed=true; saveState(); syncProfileConfirm(); calculate();
   const hero=$('plan-hero'), top=hero.getBoundingClientRect().top;
   if(top<0||top>innerHeight*0.6) hero.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
