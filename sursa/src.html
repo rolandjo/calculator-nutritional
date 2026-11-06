@@ -418,10 +418,10 @@
           </span>
           <div class="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50" role="group" aria-label="Mod de calcul">
             <button type="button" data-mode="percent" class="btn-mode px-3 py-1.5 text-xs font-semibold rounded flex items-center gap-1.5 text-slate-600">
-              <i data-fa="percent"></i> După procent
+              <i data-fa="percent"></i> Aleg ritmul
             </button>
             <button type="button" data-mode="target" class="btn-mode px-3 py-1.5 text-xs font-semibold rounded flex items-center gap-1.5 text-slate-600">
-              <i data-fa="flag-checkered"></i> După țintă și termen
+              <i data-fa="flag-checkered"></i> Am o greutate-țintă
             </button>
           </div>
         </div>
@@ -484,7 +484,7 @@
       <div class="pt-4 border-t border-slate-100">
         <button id="toggle-advanced" type="button" aria-expanded="false" aria-controls="advanced-panel" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5">
           <i data-fa="sliders"></i>
-          <span>Configurare flexibilă macronutrienți (Proteine & Grăsimi)</span>
+          <span>Personalizează proteinele și grăsimile</span>
           <span id="toggle-arrow" class="inline-flex transition-transform"><i data-fa="chevron-down"></i></span>
         </button>
         <div id="advanced-panel" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
@@ -1628,8 +1628,27 @@
     }
 
     // ---------- Validare ----------
+    // Erori lângă câmp: contur, text imediat sub câmp, aria-invalid + aria-describedby. Mesajul de sus rămâne ca rezumat.
+    function setFieldError(el, msg) {
+      if (!el) return;
+      const id = `${el.id}-error`;
+      let p = document.getElementById(id);
+      const ids = (el.getAttribute('aria-describedby') || '').split(/\s+/).filter(x => x && x !== id);
+      if (msg) {
+        if (!p) { p = h('p', { id, class: 'field-error' }); el.after(p); }
+        p.textContent = msg;
+        el.setAttribute('aria-invalid', 'true');
+        el.setAttribute('aria-describedby', [...ids, id].join(' '));
+      } else {
+        if (p) p.remove();
+        el.removeAttribute('aria-invalid');
+        if (ids.length) el.setAttribute('aria-describedby', ids.join(' ')); else el.removeAttribute('aria-describedby');
+      }
+    }
+
     function validateInputs() {
       const errors = [];
+      const fieldErrors = new Map();
       const age = elAge.valueAsNumber;
       const height = elHeight.valueAsNumber;
       const weight = elWeight.valueAsNumber;
@@ -1637,15 +1656,19 @@
 
       if (!Number.isInteger(age) || age < 18 || age > 120) {
         errors.push(tl('Vârsta trebuie să fie un număr întreg între 18 și 120 de ani (formulele sunt calibrate pentru adulți).', 'Age must be a whole number between 18 and 120 (the formulas are calibrated for adults).'));
+        fieldErrors.set(elAge, tl('Introdu o vârstă între 18 și 120 de ani (număr întreg).', 'Enter an age between 18 and 120 (whole number).'));
       }
       if (!Number.isFinite(height) || height < 100 || height > 250) {
         errors.push(tl('Înălțimea trebuie să fie între 100 și 250 cm.', 'Height must be between 100 and 250 cm.'));
+        fieldErrors.set(elHeight, tl('Introdu o înălțime între 100 și 250 cm.', 'Enter a height between 100 and 250 cm.'));
       }
       if (!Number.isFinite(weight) || weight < 30 || weight > 300) {
         errors.push(tl('Greutatea actuală trebuie să fie între 30 și 300 kg.', 'Current weight must be between 30 and 300 kg.'));
+        fieldErrors.set(elWeight, tl('Introdu o greutate între 30 și 300 kg.', 'Enter a weight between 30 and 300 kg.'));
       }
       if (state.useRefWeight && (!Number.isFinite(refWeight) || refWeight < 30 || refWeight > 250)) {
         errors.push(tl('Greutatea de referință trebuie să fie între 30 și 250 kg.', 'Reference weight must be between 30 and 250 kg.'));
+        fieldErrors.set(elRefWeight, tl('Introdu o greutate de referință între 30 și 250 kg.', 'Enter a reference weight between 30 and 250 kg.'));
       }
       if (!['male', 'female'].includes(state.gender)) errors.push(tl('Selectați sexul utilizat de formulă.', 'Select the sex used by the formula.'));
       if (!ACTIVITY_FACTORS.includes(state.activity)) errors.push(tl('Selectați un nivel de activitate din listă.', 'Select an activity level from the list.'));
@@ -1659,13 +1682,17 @@
       if (![1, 2, 3, 4, 5].includes(state.mealsCount)) errors.push(tl('Numărul meselor trebuie să fie între 1 și 5.', 'The number of meals must be between 1 and 5.'));
       if (state.planMode === 'target') {
         const tw = elTargetWeight.valueAsNumber;
-        if (!Number.isFinite(tw) || tw < 30 || tw > 300) errors.push(tl('Greutatea dorită trebuie să fie între 30 și 300 kg.', 'Target weight must be between 30 and 300 kg.'));
-        else state.targetWeight = tw;
+        if (!Number.isFinite(tw) || tw < 30 || tw > 300) {
+          errors.push(tl('Greutatea dorită trebuie să fie între 30 și 300 kg.', 'Target weight must be between 30 and 300 kg.'));
+          fieldErrors.set(elTargetWeight, tl('Introdu o greutate dorită între 30 și 300 kg.', 'Enter a target weight between 30 and 300 kg.'));
+        } else state.targetWeight = tw;
         if (!Number.isInteger(state.targetDays) || state.targetDays < MIN_TARGET_DAYS || state.targetDays > MAX_TARGET_DAYS) {
           errors.push(tl('Termenul trebuie să fie între 1 și 104 săptămâni (data-țintă: între 7 zile și 2 ani de azi).', 'The deadline must be between 1 and 104 weeks (target date: between 7 days and 2 years from today).'));
+          fieldErrors.set($('input-target-weeks'), tl('Introdu un termen între 1 și 104 săptămâni.', 'Enter a deadline between 1 and 104 weeks.'));
         }
       }
 
+      [elAge, elHeight, elWeight, elRefWeight, elTargetWeight, $('input-target-weeks')].forEach(el => setFieldError(el, fieldErrors.get(el)));
       const invalid = errors.length > 0;
       document.body.classList.toggle('invalid-inputs', invalid);
       elValAlert.classList.toggle('hidden', !invalid);
@@ -2036,7 +2063,9 @@
     function evaluateGoal(intake, sim, eq) {
       if (!state.useGoalWeight) return null;
       const goal = elGoalWeight.valueAsNumber;
-      if (!Number.isFinite(goal) || goal < 30 || goal > 300) {
+      const goalOk = Number.isFinite(goal) && goal >= 30 && goal <= 300;
+      setFieldError(elGoalWeight, goalOk ? null : tl('Introdu o greutate dorită între 30 și 300 kg.', 'Enter a target weight between 30 and 300 kg.'));
+      if (!goalOk) {
         return { tone: 'error', text: tl('Introduceți o greutate dorită între 30 și 300 kg.', 'Enter a target weight between 30 and 300 kg.'), short: tl('valoare invalidă', 'invalid value') };
       }
       if (state.goalWeight !== goal) { state.goalWeight = goal; saveState(); }
@@ -2109,14 +2138,14 @@
       const nodes = [];
       for (let v = lo; v <= hi + 1e-9; v += step) {
         nodes.push(svgEl('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), class: 'stroke-slate-200', 'stroke-width': 1 }));
-        nodes.push(svgEl('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', class: 'fill-slate-500', 'font-size': 11 }, v.toLocaleString(LOC())));
+        nodes.push(svgEl('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', class: 'fill-slate-500 chart-label', 'font-size': 11 }, v.toLocaleString(LOC())));
       }
       for (const d of tickDays) {
         nodes.push(svgEl('line', { x1: x(d), x2: x(d), y1: H - B, y2: H - B + 4, class: 'stroke-slate-300' }));
-        nodes.push(svgEl('text', { x: x(d), y: H - B + 17, 'text-anchor': 'middle', class: 'fill-slate-500', 'font-size': 11 }, tickLabel(d)));
+        nodes.push(svgEl('text', { x: x(d), y: H - B + 17, 'text-anchor': 'middle', class: 'fill-slate-500 chart-label', 'font-size': 11 }, tickLabel(d)));
       }
-      nodes.push(svgEl('text', { x: L - 8, y: H - 4, 'text-anchor': 'end', class: 'fill-slate-500', 'font-size': 10 }, 'kg'));
-      nodes.push(svgEl('text', { x: W - R, y: H - 4, 'text-anchor': 'end', class: 'fill-slate-500', 'font-size': 10 }, tl('săptămâni', 'weeks')));
+      nodes.push(svgEl('text', { x: L - 8, y: H - 4, 'text-anchor': 'end', class: 'fill-slate-500 chart-label', 'font-size': 10 }, 'kg'));
+      nodes.push(svgEl('text', { x: W - R, y: H - 4, 'text-anchor': 'end', class: 'fill-slate-500 chart-label', 'font-size': 10 }, tl('săptămâni', 'weeks')));
 
       // Linie țintă
       if (goalInRange) {
@@ -2131,11 +2160,11 @@
       // Aria și linia curbei (eșantion zilnic)
       const line = pts.map((w, d) => `${d === 0 ? 'M' : 'L'}${x(d).toFixed(1)},${y(w).toFixed(1)}`).join('');
       nodes.push(svgEl('path', { d: `${line}L${x(horizonDays).toFixed(1)},${H - B}L${x(0).toFixed(1)},${H - B}Z`, class: 'fill-indigo-500/10' }));
-      nodes.push(svgEl('path', { d: line, fill: 'none', class: 'stroke-indigo-600', 'stroke-width': 2.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+      nodes.push(svgEl('path', { d: line, fill: 'none', class: 'stroke-indigo-600 chart-main', 'stroke-width': 2.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
       // Linie de comparație: modelul simplu (fără adaptare și fără apă/glicogen)
       if (cmp && cmp.some((v, i) => Math.abs(v - pts[i]) > 0.05)) {
         const cLine = cmp.map((w, d) => `${d === 0 ? 'M' : 'L'}${x(d).toFixed(1)},${y(w).toFixed(1)}`).join('');
-        nodes.push(svgEl('path', { d: cLine, fill: 'none', class: 'stroke-slate-400', 'stroke-width': 1.5, 'stroke-dasharray': '5 4' }));
+        nodes.push(svgEl('path', { d: cLine, fill: 'none', class: 'stroke-slate-400 chart-compare', 'stroke-width': 1.5, 'stroke-dasharray': '5 4' }));
       }
 
       // Puncte la repere, cu valori la hover

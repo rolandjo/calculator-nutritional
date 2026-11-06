@@ -62,6 +62,17 @@
  .disclosure-trigger:hover, .disclosure-trigger[aria-expanded="true"] { background:var(--wellness-soft); color:var(--wellness-brand); }
  .nav-flash { animation:nav-flash 1.2s ease-out; }
  @keyframes nav-flash { 0%,35% { outline:2px solid var(--wellness-brand); outline-offset:3px; } 100% { outline:2px solid transparent; outline-offset:3px; } }
+ /* v36: field errors next to the field */
+ .field-error { margin:5px 0 0; font-size:12px; line-height:1.35; font-weight:500; color:#b23a2a; }
+ html.dark .field-error { color:#f28b7a; }
+ input[aria-invalid="true"] { border-color:#b23a2a !important; box-shadow:0 0 0 1px #b23a2a; }
+ html.dark input[aria-invalid="true"] { border-color:#f28b7a !important; box-shadow:0 0 0 1px #f28b7a; }
+ /* v36: chart legibility in dark theme */
+ html.dark #proj-chart .chart-main { stroke:#a8dcb3; }
+ html.dark #proj-chart .chart-compare { stroke:#a7b4ab; }
+ html.dark #proj-chart .chart-label { fill:#c4d0c7; }
+ html.dark #proj-chart-legend { color:#c4d0c7; }
+ html.dark #proj-chart circle.fill-white { stroke:#a8dcb3; }
  .disclosure-trigger:focus-visible { outline:2px solid var(--wellness-brand); outline-offset:2px; }
  .activity-select-wrap > .disclosure-trigger svg { width:16px; height:16px; }
  #goal-section > .disclosure-trigger { position:absolute; right:16px; top:18px; }
@@ -367,4 +378,21 @@
  #macro-donut .legend-copy { min-width:150px; }
  #projection-delta { display:none; }
  .reference-meal .meal-macros { display:block; }
+}
+/* v36: 44 px touch targets — last, so they win over the per-breakpoint sizes above */
+@media screen {
+ /* v36: 44 px touch targets — small icons keep their look, the hit area grows around them */
+ .disclosure-trigger, .info-btn { position:relative; }
+ .disclosure-trigger::after, .info-btn::after { content:''; position:absolute; left:50%; top:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
+ #goal-section > .disclosure-trigger.has-label { width:auto; gap:6px; padding:0 10px; height:30px; font-size:12px; font-weight:600; }
+ #goal-section > .disclosure-trigger.has-label::after { width:calc(100% + 14px); }
+ #meal-count .btn-meal { min-height:44px; }
+ #goal-mode .btn-mode, #goal-section .btn-mode { min-height:44px; }
+ #mode-percent-panel .btn-goal { min-height:44px; }
+ #app-header #mobile-menu, #mobile-tabs a, #projection-details > summary, #document-actions button, #app-header .theme-switch button, #app-header .language-switch button { min-height:44px; }
+ #app-header #mobile-menu { min-width:44px; }
+ nav .nav-link, #calculation-intro .nav-link { min-height:44px; }
+ #input-goal-pct { height:44px; padding:18px 0; background-clip:content-box; margin:-4px 0 -13px; }
+ #profile-sidebar input[type="number"], #profile-sidebar input[type="date"], #input-goal-weight { min-height:44px; }
+ #meals-breakdown > div { cursor:pointer; }
 }

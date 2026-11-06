@@ -14,6 +14,7 @@ Object.assign(I18N,{
   ,'Fibre, lichide și monitorizare':'Fibre, fluids and monitoring'
   ,'(Metabolism bazal)':'(Basal metabolism)', '(Necesar total)':'(Daily needs)'
  ,'(Indice de masă corporală)':'(Body mass index)', 'Categorie OMS:':'WHO category:'
+ ,'Aleg ritmul':'I choose the pace', 'Am o greutate-țintă':'I have a target weight', 'Personalizează proteinele și grăsimile':'Customise protein and fat', 'Opțiuni':'Options'
  ,'Calculator nutrițional gratuit: necesar caloric (BMR, TDEE), macronutrienți, IMC, mese și evoluția greutății, după Mifflin-St Jeor, ISSN și Hall.':'Free nutrition calculator: calorie needs (BMR, TDEE), macronutrients, BMI, meal split and weight trajectory, based on Mifflin-St Jeor, ISSN and Hall.'
 });
 const OUTLINE_PATHS={
@@ -145,7 +146,14 @@ function setupReferencePolish(){
   return button;
  };
  activityHelp.before(disclosureTrigger(activityHelp,'activity-help-panel','info','Ce înseamnă nivelurile?'));
- goal.append(disclosureTrigger(options,'goal-options','settings','Țintă și setări avansate'));
+ const optionsTrigger=disclosureTrigger(options,'goal-options','settings','Opțiuni');
+ optionsTrigger.removeAttribute('aria-label'); optionsTrigger.classList.add('has-label'); optionsTrigger.append(h('span',null,'Opțiuni'));
+ goal.append(optionsTrigger);
+ // Whole meal row toggles its macro details, not only the +.
+ $('meals-breakdown').addEventListener('click',e=>{
+  if(e.target.closest('summary, a, button, input, .meal-macro-values')) return;
+  const row=e.target.closest('#meals-breakdown > div'); const d=row&&row.querySelector('details.meal-macros'); if(d) d.open=!d.open;
+ });
  const slider=$('goal-slider-wrapper');
  const guide=h('details',{class:'slider-guide'},h('summary',null,'Intervale și precauții'));
  guide.append($('zone-safe').parentElement.parentElement,$('goal-slider-hint'));
