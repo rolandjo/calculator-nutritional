@@ -156,14 +156,16 @@ function setupReferencePolish(){
   label.replaceChildren(outlineIcon(i?'bolt':'flame'),h('span',{class:'metabolic-title'},h('strong',null,i?'TDEE':'BMR'),' ',h('span',{class:'metabolic-detail'},i?'(Necesar total)':'(Metabolism bazal)')),info);
  });
  // Third card: BMI, mirrored from the profile's BMI panel (value + WHO category).
- const bmiValue=h('span',{id:'energy-bmi-value',class:'text-3xl font-extrabold'},'—'), bmiCat=h('span',{id:'energy-bmi-cat',class:'bmi-cat'});
+ const bmiValue=h('span',{id:'energy-bmi-value',class:'text-3xl font-extrabold'},'—');
  energy.append(h('div',{id:'energy-bmi',class:'print-card'},
   h('span',{class:'metabolic-label'},outlineIcon('scale'),h('span',{class:'metabolic-title'},h('strong',null,'IMC'),' ',h('span',{class:'metabolic-detail'},'(Indice de masă corporală)'))),
-  h('div',{class:'mt-2 flex items-baseline'},bmiValue,h('span',{class:'text-sm'},'kg/m²')),bmiCat));
+  h('div',{class:'mt-2 flex items-baseline'},bmiValue,h('span',{class:'text-sm'},'kg/m²'))));
  const syncBmi=()=>{
   const valid=!$('bmi-panel').classList.contains('opacity-40'), text=$('bmi-value').textContent.trim(), n=parseFloat(text.replace(',','.'));
-  bmiValue.textContent=valid&&!isNaN(n)?text:'—'; bmiCat.textContent=valid&&!isNaN(n)?$('bmi-badge').textContent:'';
-  bmiCat.dataset.level=isNaN(n)?'':n<18.5?'low':n<25?'ok':n<30?'over':'high';
+  const ok=valid&&!isNaN(n);
+  // The number's colour carries the WHO category; the category name stays available as a tooltip / screen-reader label.
+  bmiValue.textContent=ok?text:'—'; bmiValue.dataset.level=ok?(n<18.5?'low':n<25?'ok':n<30?'over':'high'):'';
+  if(ok){bmiValue.title=$('bmi-badge').textContent; bmiValue.setAttribute('aria-label',text+' kg/m², '+bmiValue.title);} else {bmiValue.removeAttribute('title'); bmiValue.removeAttribute('aria-label');}
  };
  new MutationObserver(syncBmi).observe($('bmi-panel'),{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class']});
  syncBmi();
