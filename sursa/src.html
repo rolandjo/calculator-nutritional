@@ -19,8 +19,13 @@
       var dark = t === 'dark' || (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
       document.documentElement.classList.toggle('dark', dark);
       document.documentElement.setAttribute('data-theme', t);
+      // The final layout is assembled by script at the end of <body>; keep the page invisible until then
+      // so the first paint is the final layout (no layout shift). Safety net: show it after 3 s regardless.
+      document.documentElement.classList.add('layout-pending');
+      setTimeout(function () { document.documentElement.classList.remove('layout-pending'); }, 3000);
     })();
   </script>
+  <style>html.layout-pending body { visibility: hidden; }</style>
   <!--__PWA_HEAD__-->
   <style>/*__FONTS__*/</style>
   <style>/*__COLOR_VARS__*/</style>
@@ -3097,6 +3102,7 @@
     loadSavedState();
     syncFormWithState();
     if (LANG === 'en') applyLang('en', false); else calculate({ instant: true });
+    document.documentElement.classList.remove('layout-pending');
     /*__PWA_JS__*/
   </script>
 </body>

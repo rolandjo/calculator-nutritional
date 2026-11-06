@@ -28,6 +28,7 @@ Calculator web pentru necesarul caloric zilnic, macronutrienți, repartiția pe 
 ```
 index.html                        Aplicația completă (un singur fișier, merge offline)
 en/index.html                     Aceeași aplicație în engleză (titlu, descriere și hreflang proprii, pentru motoarele de căutare)
+fonts/                            Fontul Inter (woff2), încărcat separat pe GitHub Pages ca să poată fi pus în cache
 manifest.webmanifest, sw.js, icons/   PWA (instalare + cache offline pe GitHub Pages)
 google-sites/
   calculator_nutritional_google_sites.html   Variantă mai mică pentru Google Sites (font din Google Fonts)

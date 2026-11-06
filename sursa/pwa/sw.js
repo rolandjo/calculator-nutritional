@@ -1,8 +1,8 @@
 // Service worker: aplicația funcționează offline după prima vizită.
 // Strategie: răspuns imediat din cache, actualizare în fundal (stale-while-revalidate).
 // La o versiune nouă, schimbă CACHE ca să fie șters cache-ul vechi.
-const CACHE = 'calc-nutritional-v33';
-const ASSETS = ['./', './index.html', './en/', './en/index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png'];
+const CACHE = 'calc-nutritional-v34';
+const ASSETS = ['./', './index.html', './en/', './en/index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png', './fonts/inter-latin-wght-normal.woff2', './fonts/inter-latin-ext-wght-normal.woff2'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));

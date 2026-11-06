@@ -7,6 +7,7 @@ import { dirname, join } from 'node:path';
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import colors from 'tailwindcss/colors.js';
+import { transformSync } from 'esbuild';
 
 const VARIANT = process.argv[2] || 'offline';
 const OUT = process.argv[3] || (VARIANT === 'sites' ? '../google-sites/calculator_nutritional_google_sites.html' : '../index.html');
@@ -38,8 +39,15 @@ html = html.replace('/*__ICONS__*/{}', JSON.stringify(Object.fromEntries(dynamic
 
 // ---------- Fonturi ----------
 let fonts;
+const FONT_FILES = ['inter-latin-wght-normal.woff2', 'inter-latin-ext-wght-normal.woff2'];
+const RANGE_EXT = 'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF';
+const RANGE_LATIN = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
 if (VARIANT === 'sites') {
   fonts = "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap');";
+} else if (VARIANT === 'github') {
+  // GitHub Pages: fonts as separate, cacheable files (smaller HTML, faster parsing); copied to ../fonts/ below.
+  fonts = `@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:100 900;src:url('fonts/${FONT_FILES[1]}') format('woff2');unicode-range:${RANGE_EXT};}
+@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:100 900;src:url('fonts/${FONT_FILES[0]}') format('woff2');unicode-range:${RANGE_LATIN};}`;
 } else {
   const b64 = f => readFileSync(`${FONT_DIR}/${f}`).toString('base64');
   fonts = `
@@ -59,7 +67,7 @@ if (VARIANT === 'github') {
 
 // ---------- PWA (doar varianta GitHub Pages) ----------
 if (VARIANT === 'github') {
-  html = html.replace('<!--__PWA_HEAD__-->', '<link rel="manifest" href="manifest.webmanifest">\n  <meta name="theme-color" content="#2F6755">\n  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">\n  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">');
+  html = html.replace('<!--__PWA_HEAD__-->', `<link rel="preload" href="fonts/${FONT_FILES[0]}" as="font" type="font/woff2" crossorigin>\n  ` + '<link rel="manifest" href="manifest.webmanifest">\n  <meta name="theme-color" content="#2F6755">\n  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">\n  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">');
   html = html.replace('/*__PWA_JS__*/', "if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); }); }");
 } else {
   html = html.replace('<!--__PWA_HEAD__-->', '').replace('/*__PWA_JS__*/', '');
@@ -103,9 +111,20 @@ const twCli = join(dirname(createRequire(import.meta.url).resolve('tailwindcss/p
 execFileSync(process.execPath, [twCli, '-c', '.tw.config.cjs', '-i', '.tw-in.css', '-o', '.tw-out.css', '--minify'], { stdio: 'inherit' });
 html = html.replace('/*__TAILWIND__*/', readFileSync('.tw-out.css', 'utf8'));
 
-writeFileSync(OUT, html);
+// ---------- Minificare: scripturile și stilurile inline (sursa rămâne src.html) ----------
+function minifyHtml(src) {
+  return src
+    .replace(/<script>([\s\S]*?)<\/script>/g, (_, code) => `<script>${transformSync(code, { loader: 'js', minify: true, target: 'es2020', legalComments: 'none' }).code.trim()}</script>`)
+    .replace(/<style>([\s\S]*?)<\/style>/g, (_, css) => `<style>${transformSync(css, { loader: 'css', minify: true, legalComments: 'none' }).code.trim()}</style>`);
+}
+
+writeFileSync(OUT, minifyHtml(html));
 if (VARIANT === 'github' && existsSync('pwa')) cpSync('pwa', dirname(OUT), { recursive: true }); // manifest, sw.js, iconițe lângă index.html
-console.log(`OK [${VARIANT}] -> ${OUT} (${(html.length / 1024).toFixed(0)} KB)`);
+if (VARIANT === 'github') {
+  mkdirSync(join(dirname(OUT), 'fonts'), { recursive: true });
+  for (const f of FONT_FILES) cpSync(`${FONT_DIR}/${f}`, join(dirname(OUT), 'fonts', f));
+}
+console.log(`OK [${VARIANT}] -> ${OUT} (${(minifyHtml(html).length / 1024).toFixed(0)} KB)`);
 
 // ---------- Pagina în engleză: en/index.html (doar GitHub Pages) ----------
 // Același cod; diferă limba din <html>, titlul, descrierea, canonical și căile relative spre PWA.
@@ -129,6 +148,9 @@ if (VARIANT === 'github') {
   en = one(en, 'href="icons/icon-192.png"', 'href="../icons/icon-192.png"');
   en = one(en, 'href="icons/apple-touch-icon.png"', 'href="../icons/apple-touch-icon.png"');
   en = one(en, "navigator.serviceWorker.register('sw.js')", "navigator.serviceWorker.register('../sw.js')");
+  en = en.split("url('fonts/").join("url('../fonts/");
+  en = one(en, `<link rel="preload" href="fonts/`, `<link rel="preload" href="../fonts/`);
+  en = minifyHtml(en);
   const enOut = join(dirname(OUT), 'en', 'index.html');
   mkdirSync(dirname(enOut), { recursive: true });
   writeFileSync(enOut, en);
