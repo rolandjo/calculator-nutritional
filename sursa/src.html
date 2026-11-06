@@ -442,7 +442,7 @@
               <input type="date" id="input-target-date" class="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-semibold text-slate-900">
             </div>
           </div>
-          <p id="target-hint" class="text-xs text-slate-600">Aportul zilnic se calculează astfel încât greutatea dorită să fie atinsă la termen, în limite sigure.</p>
+          <p id="target-hint" class="text-xs text-slate-600">Aportul zilnic se calculează astfel încât greutatea dorită să fie atinsă la termen, în limitele de ritm și de aport minim ale aplicației.</p>
         </div>
 
         <!-- Mod: procent față de menținere -->
@@ -1982,6 +1982,7 @@
 
     // ---------- Model dinamic al greutății ----------
     // Parametrii depind de aport: adaptarea metabolică țintă (β × ΔEI) și variația apă+glicogen
+    const GLY_MIN_BASE_CARB_G = 50;
     function modelParams(intake, adaptive = true) {
       const tdee0 = bmrFor(state.weight) * state.activity;
       if (!adaptive) return { tdee0, atTarget: 0, glyTarget: 0 };
@@ -1990,10 +1991,14 @@
       const protKcal = (state.useRefWeight ? state.refWeight : state.weight) * state.protRatio * 4;
       const carbsAt = (kcal) => Math.max(0, kcal - protKcal - kcal * state.fatPct / 100);
       const cBase = carbsAt(tdee0);
-      const glyTarget = cBase > 0
-        ? GLYCOGEN_BASE_KG * (Math.sqrt(carbsAt(intake) / cBase) - 1) * (1 + WATER_PER_G_GLYCOGEN)
-        : 0;
-      return { tdee0, atTarget, glyTarget };
+      // Domeniu de aplicare: raportul față de carbohidrații de bază are sens doar dacă la menținere există un aport
+      // obișnuit de carbohidrați (≥ 50 g/zi, pragul sub care apare cetoza). Sub el, rezervele de glicogen sunt deja
+      // reduse, iar raportul ar exploda numeric → componenta apă/glicogen nu se modelează (glyNA).
+      if (cBase < GLY_MIN_BASE_CARB_G * 4) return { tdee0, atTarget, glyTarget: 0, glyNA: true };
+      // Plafon fiziologic: rezervele cel mult se dublează (supercompensare), deci √raport ≤ 2.
+      const ratio = Math.min(carbsAt(intake) / cBase, 4);
+      const glyTarget = GLYCOGEN_BASE_KG * (Math.sqrt(ratio) - 1) * (1 + WATER_PER_G_GLYCOGEN);
+      return { tdee0, atTarget, glyTarget, glyNA: false };
     }
 
     // Simulare zilnică cu aport constant. adaptive=false → modelul simplu (doar greutatea).
@@ -2034,7 +2039,7 @@
       if (!Number.isFinite(goal) || goal < 30 || goal > 300) {
         return { tone: 'error', text: tl('Introduceți o greutate dorită între 30 și 300 kg.', 'Enter a target weight between 30 and 300 kg.'), short: tl('valoare invalidă', 'invalid value') };
       }
-      state.goalWeight = goal;
+      if (state.goalWeight !== goal) { state.goalWeight = goal; saveState(); }
       const diff = goal - state.weight;
       const tdee0 = sim.tdees[0];
       const dailyBalance = intake - tdee0;
@@ -2180,7 +2185,7 @@
       const simple = runModel(intake, horizonDays, { adaptive: false, record: true });
       $('proj-at').textContent = signed(sim.params.atTarget, 0);
       $('proj-gly').textContent = signed(sim.params.glyTarget);
-      $('proj-gly-sub').textContent = Math.abs(sim.params.glyTarget) < 0.05 ? tl('variație neglijabilă', 'negligible change') : sim.params.glyTarget < 0 ? tl('pierdute în primele ~1–2 săpt.', 'lost in the first ~1–2 wk') : tl('refăcute în primele ~1–2 săpt.', 'regained in the first ~1–2 wk');
+      $('proj-gly-sub').textContent = sim.params.glyNA ? tl('nu se modelează: carbohidrați la menținere sub 50 g/zi', 'not modelled: maintenance carbs below 50 g/day') : Math.abs(sim.params.glyTarget) < 0.05 ? tl('variație neglijabilă', 'negligible change') : sim.params.glyTarget < 0 ? tl('pierdute în primele ~1–2 săpt.', 'lost in the first ~1–2 wk') : tl('refăcute în primele ~1–2 săpt.', 'regained in the first ~1–2 wk');
       $('at-desc').textContent = state.atLevel === 0
         ? tl('consumul scade doar prin scăderea greutății.', 'expenditure falls only through weight loss.')
         : tl(`${Math.round(state.atLevel * 100)}% din diferența aport–menținere (${signed(sim.params.atTarget, 0)} kcal/zi după instalare).`, `${Math.round(state.atLevel * 100)}% of the intake–maintenance gap (${signed(sim.params.atTarget, 0)} kcal/day once settled).`);
@@ -2297,8 +2302,10 @@
     }
     // Aportul constant care duce la greutatea `targetW` după `days` zile (bisecție; funcție crescătoare în aport).
     // key='tissue' → țintă pe greutatea de țesut (fără apă/glicogen), folosită pentru limitele de ritm.
+    // Returnează NaN dacă ținta nu e atinsă nicio valoare din interval (0–12.000 kcal/zi).
     function solveIntake(days, targetW, key = 'w') {
       let lo = 0, hi = 12000;
+      if (simulateEnd(lo, days, key) > targetW || simulateEnd(hi, days, key) < targetW) return NaN;
       for (let i = 0; i < 60; i++) {
         const mid = (lo + hi) / 2;
         if (simulateEnd(mid, days, key) < targetW) lo = mid; else hi = mid;
@@ -2321,16 +2328,17 @@
         plan.required = plan.intake = tdee0;
       } else {
         plan.required = solveIntake(days, tw);
+        plan.unreachable = !Number.isFinite(plan.required);
         if (plan.direction === 'loss') {
           const rateLimit = solveIntake(7, w0 * (1 - MAX_LOSS_PCT_WEEK / 100), 'tissue');
           plan.safe = Math.max(minFloor, rateLimit);
           plan.binding = minFloor >= rateLimit ? 'floor' : 'rate';
-          plan.capped = plan.required < plan.safe;
+          plan.capped = plan.unreachable || plan.required < plan.safe;
           plan.blocked = plan.safe >= tdee0; // pragul minim e peste consumul estimat
         } else {
           plan.safe = solveIntake(7, w0 * (1 + MAX_GAIN_PCT_WEEK / 100), 'tissue');
           plan.binding = 'rate';
-          plan.capped = plan.required > plan.safe;
+          plan.capped = plan.unreachable || plan.required > plan.safe;
         }
         plan.intake = plan.capped ? plan.safe : plan.required;
         if (plan.capped && !plan.blocked) {
@@ -2338,6 +2346,8 @@
           plan.eqSafe = equilibriumWeight(plan.safe);
         }
       }
+      // Același prag convențional ca în modul procentual: dacă aportul planului e sub el, nu îl etichetăm ca sigur.
+      plan.belowFloor = !plan.blocked && plan.intake < minFloor;
       plan.reached = simulateEnd(plan.intake, days);
       plan.week1Pct = (simulateEnd(plan.intake, 7, 'tissue') - w0) / w0 * 100;
       plan.avgRate = (plan.reached - w0) / (days / 7);
@@ -2361,20 +2371,24 @@
       elTargetPlanCard.classList.toggle('hidden', !plan);
       if (!plan) return;
       const until = dateAfterDays(plan.days);
-      $('target-hint').textContent = tl(`${daysLabel(plan.days)} · până la ${until}. Aportul zilnic se calculează astfel încât greutatea dorită să fie atinsă la termen, în limite sigure.`, `${daysLabel(plan.days)} · by ${until}. Daily intake is calculated so the target weight is reached by the deadline, within safe limits.`);
+      $('target-hint').textContent = tl(`${daysLabel(plan.days)} · până la ${until}. Aportul zilnic se calculează astfel încât greutatea dorită să fie atinsă la termen, în limitele de ritm și de aport minim ale aplicației.`, `${daysLabel(plan.days)} · by ${until}. Daily intake is calculated so the target weight is reached by the deadline, within the app’s rate and minimum-intake limits.`);
       $('tp-title').textContent = tl(`Plan: ${fmt1(plan.w0)} → ${fmt1(plan.tw)} kg în ${daysLabel(plan.days)} (până la ${until})`, `Plan: ${fmt1(plan.w0)} → ${fmt1(plan.tw)} kg in ${daysLabel(plan.days)} (by ${until})`);
 
       const status = $('tp-status');
-      const [label0, cls] = plan.blocked ? ['Nu se poate în limitele aplicației', 'bg-rose-200 text-rose-900']
-        : plan.capped ? ['Termen prea scurt — plan plafonat', 'bg-amber-200 text-amber-900']
-        : plan.direction === 'maintain' ? ['Menținere', 'bg-slate-200 text-slate-800']
-        : ['Realizabil în limite sigure', 'bg-emerald-200 text-emerald-900'];
-      const label = T(label0);
+      const underweightTarget = plan.bmiTarget < 18.5 && plan.direction !== 'gain';
+      const [label, cls] = plan.blocked ? [T('Nu se poate în limitele aplicației'), 'bg-rose-200 text-rose-900']
+        : underweightTarget ? [tl('Țintă subponderală — discută cu un medic', 'Underweight target — talk to a doctor'), 'bg-rose-200 text-rose-900']
+        : plan.unreachable ? [tl('Ținta nu se poate atinge în acest termen', 'Target can’t be reached by this deadline'), 'bg-amber-200 text-amber-900']
+        : plan.capped ? [T('Termen prea scurt — plan plafonat'), 'bg-amber-200 text-amber-900']
+        : plan.belowFloor ? [tl(`Sub pragul minim de ${plan.minFloor} kcal`, `Below the ${plan.minFloor} kcal minimum`), 'bg-amber-200 text-amber-900']
+        : plan.direction === 'maintain' ? [T('Menținere'), 'bg-slate-200 text-slate-800']
+        : [tl('Realizabil în limitele aplicației', 'Achievable within the app’s limits'), 'bg-emerald-200 text-emerald-900'];
       status.textContent = label;
       status.className = `px-2 py-0.5 rounded text-[11px] font-bold ${cls}`;
 
       setNum($('tp-intake'), plan.intake);
-      $('tp-intake-sub').textContent = plan.capped ? tl(`necesar teoretic: ${fmt(plan.required)} kcal`, `theoretical need: ${fmt(plan.required)} kcal`) : tl('pe toată perioada', 'for the whole period');
+      $('tp-intake-sub').textContent = plan.unreachable ? tl('niciun aport nu atinge ținta la termen', 'no intake reaches the target by the deadline')
+        : plan.capped ? tl(`necesar teoretic: ${fmt(plan.required)} kcal`, `theoretical need: ${fmt(plan.required)} kcal`) : tl('pe toată perioada', 'for the whole period');
       const adjPct = (plan.intake - tdee) / tdee * 100;
       $('tp-adjust').textContent = `${signed(adjPct)}%`;
       $('tp-adjust-sub').textContent = `${plan.intake - tdee >= 0 ? '+' : '−'}${fmt(Math.abs(plan.intake - tdee))} ${tl('kcal/zi față de', 'kcal/day vs.')} ${fmt(tdee)}`;
@@ -2397,8 +2411,11 @@
           : plan.binding === 'floor'
             ? tl(`sub pragul minim de ${plan.minFloor} kcal/zi`, `below the ${plan.minFloor} kcal/day minimum`)
             : tl(`un ritm de slăbire de peste ${MAX_LOSS_PCT_WEEK}% din greutate pe săptămână`, `a loss rate above ${MAX_LOSS_PCT_WEEK}% of body weight per week`);
-        const parts = [tl('Pentru ', 'Reaching '), strong(`${fmt1(plan.tw)} kg`), tl(` în ${daysLabel(plan.days)} ar fi necesare ~`, ` in ${daysLabel(plan.days)} would need ~`), strong(`${fmt(plan.required)} ${tl('kcal/zi', 'kcal/day')}`),
-          tl(`, adică ${reason}. Planul folosește limita sigură de `, `, i.e. ${reason}. The plan uses the safe limit of `), strong(`${fmt(plan.safe)} ${tl('kcal/zi', 'kcal/day')}`), tl(', cu care la termen ajungi la ~', ', which gets you to ~'), strong(`${fmt1(plan.reached)} kg`), tl('. ', ' by the deadline. ')];
+        const parts = plan.unreachable
+          ? [strong(`${fmt1(plan.tw)} kg`), tl(` nu se poate atinge în ${daysLabel(plan.days)} cu niciun aport constant (chiar și la ${plan.direction === 'loss' ? '0' : '12.000'} kcal/zi modelul ajunge doar la ~`, ` can’t be reached in ${daysLabel(plan.days)} with any constant intake (even at ${plan.direction === 'loss' ? '0' : '12,000'} kcal/day the model only gets to ~`),
+              strong(`${fmt1(simulateEnd(plan.direction === 'loss' ? 0 : 12000, plan.days))} kg`), tl('). Planul folosește limita de ', '). The plan uses the limit of '), strong(`${fmt(plan.safe)} ${tl('kcal/zi', 'kcal/day')}`), tl(', cu care la termen ajungi la ~', ', which gets you to ~'), strong(`${fmt1(plan.reached)} kg`), tl('. ', ' by the deadline. ')]
+          : [tl('Pentru ', 'Reaching '), strong(`${fmt1(plan.tw)} kg`), tl(` în ${daysLabel(plan.days)} ar fi necesare ~`, ` in ${daysLabel(plan.days)} would need ~`), strong(`${fmt(plan.required)} ${tl('kcal/zi', 'kcal/day')}`),
+          tl(`, adică ${reason}. Planul folosește limita de `, `, i.e. ${reason}. The plan uses the limit of `), strong(`${fmt(plan.safe)} ${tl('kcal/zi', 'kcal/day')}`), tl(', cu care la termen ajungi la ~', ', which gets you to ~'), strong(`${fmt1(plan.reached)} kg`), tl('. ', ' by the deadline. ')];
         if (plan.minDays) {
           parts.push(tl('Ținta ar fi atinsă în ~', 'The target would be reached in ~'), strong(daysLabel(Math.ceil(plan.minDays / 7) * 7)), tl(` (în jurul datei de ${dateAfterDays(plan.minDays)}). Poți seta acest termen.`, ` (around ${dateAfterDays(plan.minDays)}). You can set this deadline.`));
         } else {
@@ -2406,11 +2423,15 @@
         }
         msgs.push(planMessage('warn', 'triangle-exclamation', ...parts));
       } else {
-        msgs.push(planMessage('ok', 'flag-checkered', tl('Cu ', 'With a constant '), strong(`${fmt(plan.intake)} ${tl('kcal/zi', 'kcal/day')}`), tl(' constant ajungi la ', ' you reach '), strong(`${fmt1(plan.tw)} kg`),
+        if (plan.belowFloor) {
+          msgs.push(planMessage('warn', 'triangle-exclamation', tl('Aportul calculat (', 'The calculated intake ('), strong(`${fmt(plan.intake)} ${tl('kcal/zi', 'kcal/day')}`),
+            tl(`) este sub pragul convențional de ${plan.minFloor} kcal/zi folosit de aplicație în modul procentual. Aplicația nu îl ridică automat, pentru că ar schimba greutatea atinsă; discută aportul cu un medic sau nutriționist. Pragul nu garantează siguranța individuală.`, `) is below the ${plan.minFloor} kcal/day conventional minimum the app uses in percentage mode. The app doesn’t raise it automatically, as that would change the weight reached; discuss this intake with a doctor or dietitian. The threshold doesn’t guarantee individual safety.`)));
+        }
+        msgs.push(planMessage(plan.belowFloor ? 'info' : 'ok', 'flag-checkered', tl('Cu ', 'With a constant '), strong(`${fmt(plan.intake)} ${tl('kcal/zi', 'kcal/day')}`), tl(' constant ajungi la ', ' you reach '), strong(`${fmt1(plan.tw)} kg`),
           tl(` în ${daysLabel(plan.days)}. Ritmul inițial (${signed(plan.week1Pct, 2)}% din greutate pe săptămână) este în limitele recomandate.`, ` in ${daysLabel(plan.days)}. The initial rate (${signed(plan.week1Pct, 2)}% of body weight per week) is within recommended limits.`)));
       }
       if (plan.bmiTarget < 18.5) {
-        msgs.push(planMessage('danger', 'circle-exclamation', tl('Greutatea dorită corespunde unui IMC de ', 'The target weight corresponds to a BMI of '), strong(plan.bmiTarget.toLocaleString(LOC(), { maximumFractionDigits: 1 })),
+        msgs.unshift(planMessage('danger', 'circle-exclamation', tl('Greutatea dorită corespunde unui IMC de ', 'The target weight corresponds to a BMI of '), strong(plan.bmiTarget.toLocaleString(LOC(), { maximumFractionDigits: 1 })),
           tl(' (sub 18,5 — subponderal). Recomandăm stabilirea țintei împreună cu un medic. ', ' (below 18.5 — underweight). We recommend setting the target together with a doctor. '), h('a', { href: '#ref-21', class: 'text-indigo-600 hover:underline' }, '[21]')));
       }
       msgs.push(planMessage('info', 'circle-info', tl(`IMC actual ${plan.bmiNow.toLocaleString(LOC(), { maximumFractionDigits: 1 })} → la țintă ${plan.bmiTarget.toLocaleString(LOC(), { maximumFractionDigits: 1 })}. Recalculează planul la fiecare 2–4 săptămâni cu greutatea reală (media săptămânală): adaptarea metabolică și variațiile de activitate pot încetini progresul. `, `Current BMI ${plan.bmiNow.toLocaleString(LOC(), { maximumFractionDigits: 1 })} → at target ${plan.bmiTarget.toLocaleString(LOC(), { maximumFractionDigits: 1 })}. Recalculate the plan every 2–4 weeks with your real weight (weekly average): metabolic adaptation and activity changes can slow progress. `), h('a', { href: '#ref-21', class: 'text-indigo-600 hover:underline' }, '[21]')));
@@ -2482,7 +2503,7 @@
       ];
       const pr = lastProjection;
       if (state.planMode === 'target' && lastPlan) {
-        rows.push(row(tl('Aport constant necesar', 'Required constant intake'), `${fmt(lastPlan.intake)} ${tl('kcal/zi', 'kcal/day')}${lastPlan.capped ? tl(` (plafonat; teoretic ${fmt(lastPlan.required)})`, ` (capped; theoretical ${fmt(lastPlan.required)})`) : ''}`));
+        rows.push(row(tl('Aport constant necesar', 'Required constant intake'), `${fmt(lastPlan.intake)} ${tl('kcal/zi', 'kcal/day')}${lastPlan.unreachable ? tl(' (ținta nu se poate atinge la termen)', ' (target can’t be reached by the deadline)') : lastPlan.capped ? tl(` (plafonat; teoretic ${fmt(lastPlan.required)})`, ` (capped; theoretical ${fmt(lastPlan.required)})`) : lastPlan.belowFloor ? tl(` (sub pragul de ${lastPlan.minFloor} kcal)`, ` (below the ${lastPlan.minFloor} kcal minimum)`) : ''}`));
         rows.push(row(tl('Greutate estimată la termen', 'Estimated weight at deadline'), `${fmt1(lastPlan.reached)} kg`));
         rows.push(row(tl('Adaptare metabolică (model)', 'Metabolic adaptation (model)'), T(AT_LABELS[state.atLevel])));
       } else if (pr) {
@@ -2730,7 +2751,9 @@
         lines.push('', tl(`PLAN DUPĂ ȚINTĂ: ${fmt1(pl.w0)} → ${fmt1(pl.tw)} kg în ${daysLabel(pl.days)} (până la ${dateAfterDays(pl.days)})`, `TARGET PLAN: ${fmt1(pl.w0)} → ${fmt1(pl.tw)} kg in ${daysLabel(pl.days)} (by ${dateAfterDays(pl.days)})`));
         lines.push(tl(`Aport constant: ${fmt(pl.intake)} kcal/zi | ritm mediu ${signed(pl.avgRate, 2)} kg/săpt. | la termen ~${fmt1(pl.reached)} kg`, `Constant intake: ${fmt(pl.intake)} kcal/day | average rate ${signed(pl.avgRate, 2)} kg/wk | at deadline ~${fmt1(pl.reached)} kg`));
         if (pl.blocked) lines.push(tl('Atenție: consumul estimat este sub pragul minim al aplicației; slăbirea nu poate fi planificată doar din aport.', 'Note: estimated expenditure is below the app’s minimum; weight loss can’t be planned from intake alone.'));
-        else if (pl.capped) lines.push(tl(`Plan plafonat la limita sigură (necesar teoretic ${fmt(pl.required)} kcal/zi).${pl.minDays ? ` Termen recomandat pentru țintă: ~${daysLabel(Math.ceil(pl.minDays / 7) * 7)}.` : ''}`, `Plan capped at the safe limit (theoretical need ${fmt(pl.required)} kcal/day).${pl.minDays ? ` Recommended deadline for the target: ~${daysLabel(Math.ceil(pl.minDays / 7) * 7)}.` : ''}`));
+        else if (pl.capped) lines.push(tl(`Plan plafonat la limita aplicației (${pl.unreachable ? 'niciun aport nu atinge ținta la termen' : `necesar teoretic ${fmt(pl.required)} kcal/zi`}).${pl.minDays ? ` Termen recomandat pentru țintă: ~${daysLabel(Math.ceil(pl.minDays / 7) * 7)}.` : ''}`, `Plan capped at the app’s limit (${pl.unreachable ? 'no intake reaches the target by the deadline' : `theoretical need ${fmt(pl.required)} kcal/day`}).${pl.minDays ? ` Recommended deadline for the target: ~${daysLabel(Math.ceil(pl.minDays / 7) * 7)}.` : ''}`));
+        if (pl.belowFloor) lines.push(tl(`Atenție: aportul planului este sub pragul convențional de ${pl.minFloor} kcal/zi.`, `Note: the plan’s intake is below the ${pl.minFloor} kcal/day conventional minimum.`));
+        if (pl.bmiTarget < 18.5) lines.push(tl('Atenție: greutatea dorită corespunde unui IMC sub 18,5 (subponderal); stabilește ținta cu un medic.', 'Note: the target weight corresponds to a BMI below 18.5 (underweight); set the target with a doctor.'));
       }
       const pr = r.projection;
       if (pr) {
