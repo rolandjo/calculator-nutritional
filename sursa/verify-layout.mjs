@@ -61,8 +61,9 @@ try {
     await page.eval(()=>{document.querySelector('[data-language="ro"]').click();document.getElementById('mobile-menu').click();document.querySelector('.activity-help > summary').click();});
     check(await page.eval(()=>document.querySelector('.activity-help').open&&document.querySelectorAll('.activity-help li').length===5),'Activity help opens all five detailed levels');
     await page.eval(()=>document.querySelector('.activity-help > summary').click());
-    await page.eval(()=>document.querySelector('#explanation-links a[href="#projection-details"]').click());
-    check(await page.eval(()=>document.getElementById('projection-details').open),'Explanation link opens the projection details');
+    check(await page.eval(()=>!document.getElementById('calculation-intro')&&!document.getElementById('projection-options')),'No „Cum se calculează?” card and a single projection disclosure level');
+    await page.eval(()=>document.querySelector('#projection-details > summary').click());
+    check(await page.eval(()=>document.getElementById('projection-details').open&&document.getElementById('horizon-group').parentElement.id==='projection-details'),'„Setări pentru proiecție” opens the horizon buttons directly');
     await page.eval(()=>{document.getElementById('compare-model').click();});
     check(await page.eval(()=>document.body.classList.contains('show-chart-comparison')),'Simple model comparison remains selectable');
     await page.eval(()=>document.getElementById('compare-model').click());

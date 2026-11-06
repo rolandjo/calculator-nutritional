@@ -119,14 +119,12 @@ function arrangeWellnessLayout() {
   const pair=h('div',{id:'overview-pair'}); energy.after(pair); pair.append(projection,meals);
   const chart=$('proj-chart-wrap').parentElement;
   const projectionKids=[...projection.children];
-  const details=h('details',{id:'projection-details'},h('summary',null,'Setări și detalii ale proiecției'));
+  const details=h('details',{id:'projection-details'},h('summary',null,'Setări pentru proiecție'));
   const metrics=projectionKids[2];
   metrics.classList.add('projection-metrics');
   projection.insertBefore(chart,projection.children[1]);
   for(const child of projectionKids.slice(1)) if(child!==chart) details.append(child);
   projection.append(details);
-  const intro=h('section',{id:'calculation-intro',class:'wellness-panel'},icon('square-root-variable'),h('div',null,h('h2',null,'Cum se calculează?'),h('p',null,'Necesarul zilnic pornește de la metabolismul bazal și nivelul de activitate. Obiectivul ales stabilește bugetul caloric, apoi distribuția macronutrienților.')));
-  pair.after(intro);
   // Re-synchronize the compact select after saved state, reset, or language changes.
   const syncActivity=()=>{
     const checked=document.querySelector('input[name="activity"]:checked').value;

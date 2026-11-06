@@ -279,8 +279,8 @@ function setupReferencePolish(){
  replaceOutline(heading,'chart');
  const subtitle=heading.firstElementChild.querySelector('p'); subtitle.classList.add('projection-original-caption');
  subtitle.after(h('p',{id:'projection-caption'}));
- const projectionOptions=h('details',{id:'projection-options'},h('summary',null,'Setări pentru proiecție'));
- projectionOptions.append($('horizon-group')); $('projection-details').insertBefore(projectionOptions,$('projection-details').children[1]);
+ // A single disclosure level: the horizon buttons sit directly under „Setări pentru proiecție”.
+ $('projection-details').insertBefore($('horizon-group'),$('projection-details').children[1]);
  // The simple-model dashed line is always drawn; its legend stays under the chart, the hover help goes to the details.
  const chart=$('proj-chart-wrap').parentElement;
  const chartLegend=$('proj-chart-help').nextElementSibling; chartLegend.id='proj-chart-legend';
@@ -292,16 +292,10 @@ function setupReferencePolish(){
  // Meal count stays visible above the meals; the split note stays below them.
  const mealCount=meals.querySelector('[role="group"]'); mealCount.id='meal-count';
  $('meals-breakdown').before(mealCount); $('meals-breakdown').after($('meals-note'));
- const intro=$('calculation-intro');replaceOutline(intro,'flask');
- const links=h('nav',{id:'explanation-links','aria-label':'Detalii de calcul'});
- for(const [id,label,name] of [['formulas','Detalii și formule','book'],['projection-details','Interpretarea rezultatelor','layers'],['references','Surse științifice','external']]) {
-  links.append(h('a',{href:'#'+id,class:'nav-jump nav-link'},outlineIcon(name),h('span',null,label),outlineIcon('chevron')));
- }
- intro.append(links);
  const extra=h('details',{id:'wellness-extras',class:'scientific-details scroll-target'},h('summary',null,outlineIcon('leaf'),h('span',null,'Fibre, lichide și monitorizare')));
  const fibre=$('val-fiber').closest('.print-card').parentElement;
  const monitor=[...$('results-section').children].find(el=>el.textContent.includes('Recomandare practică de monitorizare:'));
- intro.before(extra);extra.append(fibre);if(monitor)extra.append(monitor);
+ $('overview-pair').after(extra);extra.append(fibre);if(monitor)extra.append(monitor);
  // The scientific detail stays on the page, below the reference dashboard.
  for(const [id,label,name] of [['formulas','Detalii și formule','book'],['references','Surse științifice','external']]) {
   const details=$(id);details.classList.add('scientific-details');

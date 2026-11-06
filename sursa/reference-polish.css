@@ -244,7 +244,7 @@
  #projection-delta strong { display:block; color:#1e5937; font-size:13px; font-weight:700; }
  #projection-delta span { display:block; color:#425844; font-size:11px; margin-top:1px; }
  #projection-details { border:0; padding-top:0; margin-top:6px; }
- #projection-details > summary { font-size:11px; color:var(--wellness-muted); font-weight:450; }
+ #projection-details > summary { font-size:14px; color:var(--wellness-ink); font-weight:700; }
  #projection-options { padding:8px 0; }
  #projection-options > summary { margin-bottom:8px; }
  #meals-section { display:flex; flex-direction:column; gap:10px; }
@@ -456,13 +456,13 @@
  details[open] > summary::after, #goal-options #toggle-advanced[aria-expanded="true"]::after { content:'' !important; transform:rotate(180deg); }
  #projection-details > summary, #projection-options > summary, details.meal-macros > summary { display:flex; align-items:center; gap:8px; list-style:none; }
  #projection-details > summary::-webkit-details-marker, #projection-options > summary::-webkit-details-marker, details.meal-macros > summary::-webkit-details-marker { display:none; }
- #wellness-extras > summary::after, #formulas > summary::after, #references > summary::after {
+ #wellness-extras > summary::after, #formulas > summary::after, #references > summary::after, #projection-details > summary::after {
   width:32px; height:32px; border-radius:50%; background-color:#e3eedd;
   -webkit-mask:none; mask:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23286247' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:center; background-size:16px 16px;
  }
- #wellness-extras > summary:hover::after, #formulas > summary:hover::after, #references > summary:hover::after { background-color:#d3e5ca; }
- html.dark #wellness-extras > summary::after, html.dark #formulas > summary::after, html.dark #references > summary::after { background-color:#2d4935; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cfe9d4' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
- html.dark #wellness-extras > summary:hover::after, html.dark #formulas > summary:hover::after, html.dark #references > summary:hover::after { background-color:#365c40; }
+ #wellness-extras > summary:hover::after, #formulas > summary:hover::after, #references > summary:hover::after, #projection-details > summary:hover::after { background-color:#d3e5ca; }
+ html.dark #wellness-extras > summary::after, html.dark #formulas > summary::after, html.dark #references > summary::after, html.dark #projection-details > summary::after { background-color:#2d4935; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cfe9d4' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+ html.dark #wellness-extras > summary:hover::after, html.dark #formulas > summary:hover::after, html.dark #references > summary:hover::after, html.dark #projection-details > summary:hover::after { background-color:#365c40; }
 }
 @media (prefers-reduced-motion: reduce) {
  details > summary::after, #goal-options #toggle-advanced::after { transition:none !important; }
