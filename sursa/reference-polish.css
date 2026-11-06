@@ -152,13 +152,25 @@
  #donut-carb { stroke:var(--macro-carb); }
  #donut-kcal { font-size:22px; color:var(--wellness-ink); letter-spacing:-.025em; }
  #donut-kcal + span { color:var(--wellness-ink); font-size:12px; text-transform:none; letter-spacing:0; font-weight:450; }
- #energy-cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:570px; padding:8px; border-radius:18px; background:var(--wellness-surface); box-shadow:var(--wellness-shadow); }
+ #energy-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; max-width:none; padding:8px; border-radius:18px; background:var(--wellness-surface); box-shadow:var(--wellness-shadow); }
  #energy-cards > div { display:grid; grid-template-columns:30px 1fr; gap:3px 10px; padding:10px 14px; min-width:0; background:#f0f4eb; border-radius:12px; }
  #energy-cards .metabolic-label { display:contents; font-size:11px; color:var(--wellness-ink); }
  #energy-cards .metabolic-title { grid-column:2; grid-row:1; font-size:12px; }
  #energy-cards .metabolic-title strong { font-weight:650; }
  #energy-cards .metabolic-label > svg { grid-row:1 / 3; width:26px; height:28px; color:#215e3d; }
  #energy-cards .info-btn { display:none; }
+ #energy-cards { container-type:inline-size; }
+ #energy-cards > div { align-content:start; }
+ #energy-cards > div > .mt-2 { flex-wrap:wrap; column-gap:4px; }
+ @container (max-width:520px) { #energy-cards #energy-bmi .bmi-cat { white-space:normal; line-height:1.3; } }
+ @container (max-width:820px) { #energy-cards .metabolic-detail { display:none; } }
+ #energy-cards .bmi-cat { grid-column:2; justify-self:start; max-width:100%; overflow:hidden; text-overflow:ellipsis; margin-top:2px; padding:1px 7px; border-radius:999px; font-size:11px; font-weight:600; white-space:nowrap; align-self:center; background:#e6efe0; color:#215e3d; }
+ #energy-cards .bmi-cat:empty { display:none; }
+ #energy-cards .bmi-cat[data-level="low"], #energy-cards .bmi-cat[data-level="over"] { background:#f3e4d6; color:#8a4b22; }
+ #energy-cards .bmi-cat[data-level="high"] { background:#f2dcd6; color:#8c2f1f; }
+ html.dark #energy-cards .bmi-cat { background:#1f3325; color:#b9dcb9; }
+ html.dark #energy-cards .bmi-cat[data-level="low"], html.dark #energy-cards .bmi-cat[data-level="over"] { background:#4a3222; color:#f0c9a4; }
+ html.dark #energy-cards .bmi-cat[data-level="high"] { background:#4d2620; color:#f3b8aa; }
  #energy-cards > div > .mt-2 { grid-column:2; margin:0; gap:4px; }
  #energy-cards .text-3xl { color:var(--wellness-ink); font-size:23px; font-weight:750; line-height:1.15; letter-spacing:-.025em; }
  #energy-cards .text-sm { color:var(--wellness-ink); font-size:12px; font-weight:400; }

@@ -13,6 +13,7 @@ Object.assign(I18N,{
   'Detalii de calcul':'Calculation details'
   ,'Fibre, lichide și monitorizare':'Fibre, fluids and monitoring'
   ,'(Metabolism bazal)':'(Basal metabolism)', '(Necesar total)':'(Daily needs)'
+ ,'(Indice de masă corporală)':'(Body mass index)'
 });
 const OUTLINE_PATHS={
  user:'<circle cx="12" cy="7" r="4"/><path d="M3.5 21v-2c0-4 17-4 17 0v2c-5 2-12 2-17 0Z"/>',
@@ -42,6 +43,7 @@ const OUTLINE_PATHS={
  moon:'<path d="M20 16A10 10 0 0 1 8 4a10 10 0 1 0 12 12Z"/>',
  menu:'<path d="M3 5h18M3 12h18M3 19h18"/>',
  chevron:'<path d="m9 4 8 8-8 8"/>'
+ ,scale:'<rect x="3" y="4" width="18" height="18" rx="4"/><path d="M8 10a4 4 0 0 1 8 0Z"/><path d="m12 10 1.5-2.5"/>'
  ,info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-11v1"/>'
  ,settings:'<path d="M3 6h18M3 13h18M3 20h18"/><circle cx="8" cy="6" r="2" fill="var(--wellness-surface)"/><circle cx="16" cy="13" r="2" fill="var(--wellness-surface)"/><circle cx="9" cy="20" r="2" fill="var(--wellness-surface)"/>'
 };
@@ -153,6 +155,18 @@ function setupReferencePolish(){
   const label=card.firstElementChild, info=label.querySelector('button');label.classList.add('metabolic-label');
   label.replaceChildren(outlineIcon(i?'bolt':'flame'),h('span',{class:'metabolic-title'},h('strong',null,i?'TDEE':'BMR'),' ',h('span',{class:'metabolic-detail'},i?'(Necesar total)':'(Metabolism bazal)')),info);
  });
+ // Third card: BMI, mirrored from the profile's BMI panel (value + WHO category).
+ const bmiValue=h('span',{id:'energy-bmi-value',class:'text-3xl font-extrabold'},'—'), bmiCat=h('span',{id:'energy-bmi-cat',class:'bmi-cat'});
+ energy.append(h('div',{id:'energy-bmi',class:'print-card'},
+  h('span',{class:'metabolic-label'},outlineIcon('scale'),h('span',{class:'metabolic-title'},h('strong',null,'IMC'),' ',h('span',{class:'metabolic-detail'},'(Indice de masă corporală)'))),
+  h('div',{class:'mt-2 flex items-baseline'},bmiValue,h('span',{class:'text-sm'},'kg/m²')),bmiCat));
+ const syncBmi=()=>{
+  const valid=!$('bmi-panel').classList.contains('opacity-40'), text=$('bmi-value').textContent.trim(), n=parseFloat(text.replace(',','.'));
+  bmiValue.textContent=valid&&!isNaN(n)?text:'—'; bmiCat.textContent=valid&&!isNaN(n)?$('bmi-badge').textContent:'';
+  bmiCat.dataset.level=isNaN(n)?'':n<18.5?'low':n<25?'ok':n<30?'over':'high';
+ };
+ new MutationObserver(syncBmi).observe($('bmi-panel'),{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class']});
+ syncBmi();
  const projection=$('projection-section'), heading=projection.firstElementChild;
  replaceOutline(heading,'chart');
  const subtitle=heading.firstElementChild.querySelector('p'); subtitle.classList.add('projection-original-caption');
