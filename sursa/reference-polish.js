@@ -14,6 +14,7 @@ Object.assign(I18N,{
   ,'Fibre, lichide și monitorizare':'Fibre, fluids and monitoring'
   ,'(Metabolism bazal)':'(Basal metabolism)', '(Necesar total)':'(Daily needs)'
  ,'(Indice de masă corporală)':'(Body mass index)', 'Categorie OMS:':'WHO category:'
+ ,'Salvează planul PDF':'Save plan as PDF', 'Copiază':'Copy', 'Vezi distribuția calorică':'Show calorie distribution', 'Ascunde distribuția calorică':'Hide calorie distribution'
  ,'Aleg ritmul':'I choose the pace', 'Am o greutate-țintă':'I have a target weight', 'Personalizează proteinele și grăsimile':'Customise protein and fat', 'Opțiuni':'Options'
  ,'Calculator nutrițional gratuit: necesar caloric (BMR, TDEE), macronutrienți, IMC, mese și evoluția greutății, după Mifflin-St Jeor, ISSN și Hall.':'Free nutrition calculator: calorie needs (BMR, TDEE), macronutrients, BMI, meal split and weight trajectory, based on Mifflin-St Jeor, ISSN and Hall.'
 });
@@ -204,6 +205,27 @@ function setupReferencePolish(){
  };
  new MutationObserver(syncBmi).observe($('bmi-panel'),{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class']});
  syncBmi();
+ // v37 #6: save/copy next to the main result; reset next to the profile.
+ const heroActions=h('div',{id:'hero-actions',class:'no-print'},$('btn-print'),$('btn-copy'));
+ $('plan-hero').append(heroActions);
+ const resetBtn=$('btn-reset'); resetBtn.classList.add('no-print');
+ $('inputs-section').querySelector('.panel-heading').append(resetBtn);
+ $('document-actions').hidden=true;
+ // v37 #3: legend shows name · % on screen (grams stay in the cards; print keeps grams); on phones the donut is opt-in.
+ ['prot','fat','carb'].forEach(k=>{
+  const g=$(`legend-${k}-g`), pct=$(`lg-${k}-pct`); if(!g||!pct) return;
+  const box=g.parentElement; g.classList.add('legend-g');
+  box.replaceChildren(g,h('span',{class:'legend-sep'},' ('),pct,h('span',{class:'legend-sep'},')'));
+ });
+ const donut=$('macro-donut');
+ const donutToggle=h('button',{type:'button',id:'donut-toggle',class:'no-print','aria-expanded':'false','aria-controls':'macro-donut'},outlineIcon('chart'),h('span',null,'Vezi distribuția calorică'));
+ donut.before(donutToggle);
+ donutToggle.addEventListener('click',()=>{
+  const open=!document.body.classList.contains('donut-open');
+  document.body.classList.toggle('donut-open',open);
+  donutToggle.setAttribute('aria-expanded',String(open));
+  donutToggle.lastElementChild.textContent=T(open?'Ascunde distribuția calorică':'Vezi distribuția calorică');
+ });
  const projection=$('projection-section'), heading=projection.firstElementChild;
  replaceOutline(heading,'chart');
  const subtitle=heading.firstElementChild.querySelector('p'); subtitle.classList.add('projection-original-caption');
