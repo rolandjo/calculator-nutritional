@@ -437,3 +437,26 @@
  #profile-sidebar input[type="number"], #profile-sidebar input[type="date"], #input-goal-weight { min-height:44px; }
  #meals-breakdown > div { cursor:pointer; }
 }
+/* v44: disclosure indicators — chevron that rotates when open (instead of +/−).
+   Small rows: plain chevron in the muted text colour. Large cards: chevron in a soft round badge. */
+@media screen {
+ details > summary::after, #goal-options #toggle-advanced::after {
+  content:'' !important; flex:none; float:none; display:inline-block; width:16px; height:16px; margin:0 0 0 auto;
+  background-color:var(--wellness-muted); -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / 16px 16px no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / 16px 16px no-repeat;
+  transition:transform .2s ease;
+ }
+ details[open] > summary::after, #goal-options #toggle-advanced[aria-expanded="true"]::after { content:'' !important; transform:rotate(180deg); }
+ #projection-details > summary, #projection-options > summary, details.meal-macros > summary { display:flex; align-items:center; gap:8px; list-style:none; }
+ #projection-details > summary::-webkit-details-marker, #projection-options > summary::-webkit-details-marker, details.meal-macros > summary::-webkit-details-marker { display:none; }
+ #wellness-extras > summary::after, #formulas > summary::after, #references > summary::after {
+  width:32px; height:32px; border-radius:50%; background-color:#e3eedd;
+  -webkit-mask:none; mask:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23286247' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:center; background-size:16px 16px;
+ }
+ #wellness-extras > summary:hover::after, #formulas > summary:hover::after, #references > summary:hover::after { background-color:#d3e5ca; }
+ html.dark #wellness-extras > summary::after, html.dark #formulas > summary::after, html.dark #references > summary::after { background-color:#2d4935; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cfe9d4' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+ html.dark #wellness-extras > summary:hover::after, html.dark #formulas > summary:hover::after, html.dark #references > summary:hover::after { background-color:#365c40; }
+}
+@media (prefers-reduced-motion: reduce) {
+ details > summary::after, #goal-options #toggle-advanced::after { transition:none !important; }
+}
+
