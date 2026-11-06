@@ -496,8 +496,9 @@
  .slider-guide[open] { margin-top:12px; }
  .slider-guide[open] > div { margin-top:12px; }
  #goal-options[open] > div { margin-top:12px; }
- #goal-options [role="group"] { display:flex; border-radius:10px; }
- #goal-options .btn-mode { min-height:36px; font-size:11px; }
+ #goal-mode { margin:14px 0 4px; }
+ #goal-mode [role="group"] { display:flex; width:100%; border-radius:10px; }
+ #goal-mode .btn-mode { flex:1 1 0; justify-content:center; min-height:36px; font-size:11px; }
  /* The three option rows share one layout: label on the left, +/− at the right edge, same separators. */
  #goal-options > div:has(> #toggle-advanced), #goal-options > .body-details, #goal-options > .slider-guide { border-top:1px solid var(--wellness-border); padding:0 !important; margin:0 !important; }
  #goal-options > div:has(> #toggle-advanced) { margin-top:14px !important; }
@@ -3934,7 +3935,9 @@ function setupReferencePolish(){
  modeHeader.firstElementChild.remove();
  const options=h('details',{id:'goal-options'},h('summary',{'aria-label':'Țintă și setări avansate',title:'Țintă și setări avansate'},outlineIcon('settings'),h('span',{class:'goal-options-label'},'Țintă și setări avansate')));
  const advanced=$('toggle-advanced').parentElement;
- options.append(modeHeader,advanced);
+ // Percentage vs target-and-deadline is always visible, right under the heading.
+ modeHeader.id='goal-mode'; goal.querySelector('.panel-heading').after(modeHeader);
+ options.append(advanced);
  options.append(document.querySelector('.body-details'));
  const activityHelp=document.querySelector('.activity-help');
  activityHelp.querySelector('summary').replaceChildren(outlineIcon('info'),h('span',{class:'sr-only'},'Ce înseamnă nivelurile?'));

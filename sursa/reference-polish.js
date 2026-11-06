@@ -107,7 +107,9 @@ function setupReferencePolish(){
  modeHeader.firstElementChild.remove();
  const options=h('details',{id:'goal-options'},h('summary',{'aria-label':'Țintă și setări avansate',title:'Țintă și setări avansate'},outlineIcon('settings'),h('span',{class:'goal-options-label'},'Țintă și setări avansate')));
  const advanced=$('toggle-advanced').parentElement;
- options.append(modeHeader,advanced);
+ // Percentage vs target-and-deadline is always visible, right under the heading.
+ modeHeader.id='goal-mode'; goal.querySelector('.panel-heading').after(modeHeader);
+ options.append(advanced);
  options.append(document.querySelector('.body-details'));
  const activityHelp=document.querySelector('.activity-help');
  activityHelp.querySelector('summary').replaceChildren(outlineIcon('info'),h('span',{class:'sr-only'},'Ce înseamnă nivelurile?'));
