@@ -33,7 +33,7 @@ function arrangeWellnessLayout() {
   }
   header.insertBefore(nav, header.lastElementChild);
   const mobileNav = h('nav',{id:'mobile-tabs','aria-label':T('Secțiuni')});
-  for (const [target,label] of [['results-section','Plan'],['inputs-section','Profil'],['projection-section','Evoluție'],['formulas','Detalii']]) {
+  for (const [target,label] of [['inputs-section','Profil'],['results-section','Plan'],['projection-section','Evoluție'],['formulas','Detalii']]) {
     mobileNav.append(h('a',{href:'#'+target,class:'nav-jump nav-link'},label));
   }
   header.after(mobileNav);
