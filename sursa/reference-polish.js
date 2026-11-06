@@ -15,6 +15,7 @@ Object.assign(I18N,{
   ,'(Metabolism bazal)':'(Basal metabolism)', '(Necesar total)':'(Daily needs)'
  ,'(Indice de masă corporală)':'(Body mass index)', 'Categorie OMS:':'WHO category:'
  ,'Salvează planul PDF':'Save plan as PDF', 'Copiază':'Copy', 'Vezi distribuția calorică':'Show calorie distribution', 'Ascunde distribuția calorică':'Hide calorie distribution'
+ ,'Calculator nutrițional: calorii, macronutrienți și plan de greutate':'Nutrition calculator: calories, macronutrients and weight plan'
  ,'Exemplu de calcul':'Sample calculation', 'Vezi planul meu':'See my plan', 'Editează profilul':'Edit profile'
  ,'Valori implicite, nu ale tale: completează profilul și obiectivul, apoi apasă „Vezi planul meu”.':'Default values, not yours: fill in your profile and goal, then press “See my plan”.'
  ,'Verifică datele de mai sus; după confirmare, planul se actualizează automat la orice modificare.':'Check the details above; once confirmed, the plan updates automatically whenever you change something.'
