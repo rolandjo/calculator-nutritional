@@ -99,6 +99,27 @@ function setupReferencePolish(){
   setCurrent(proj&&(atEnd&&scrollY>0||proj.getBoundingClientRect().top<innerHeight*0.45)?'projection-section':'results-section');};
  addEventListener('scroll',()=>{if(!spyQueued){spyQueued=true;requestAnimationFrame(spy);}},{passive:true});
  spy();
+ // Mobile tabs: the tab follows the section in view (and switches immediately on tap).
+ const mobileTabs=$('mobile-tabs');
+ if(mobileTabs){
+  const tabs=[...mobileTabs.querySelectorAll('a')], tabFor=id=>tabs.find(a=>a.getAttribute('href')==='#'+id);
+  const setTab=id=>tabs.forEach(a=>a===tabFor(id)?a.setAttribute('aria-current','location'):a.removeAttribute('aria-current'));
+  // Section starts in page order; each maps to the tab that covers it.
+  const zones=[['profile-sidebar','inputs-section'],['results-section','results-section'],['projection-section','projection-section'],['wellness-extras','formulas']];
+  let tabLock=0, tabQueued=false;
+  mobileTabs.addEventListener('click',e=>{const a=e.target.closest('a'); if(a){setTab(a.getAttribute('href').slice(1)); tabLock=Date.now();}});
+  const tabSpy=()=>{tabQueued=false; if(getComputedStyle(mobileTabs).display==='none'||Date.now()-tabLock<900) return;
+   const line=mobileTabs.getBoundingClientRect().bottom+40, atEnd=scrollY+innerHeight>=document.documentElement.scrollHeight-2;
+   const ordered=zones.map(([start,tab])=>[$(start),tab]).filter(([el])=>el).map(([el,tab])=>[el.getBoundingClientRect().top,tab]).sort((x,y)=>x[0]-y[0]);
+   if(!ordered.length) return;
+   let current=ordered[0][1];
+   for(const [top,tab] of ordered) if(top<=line) current=tab;
+   if(atEnd&&scrollY>0) current=ordered[ordered.length-1][1];
+   setTab(current);};
+  addEventListener('scroll',()=>{if(!tabQueued){tabQueued=true;requestAnimationFrame(tabSpy);}},{passive:true});
+  addEventListener('scrollend',()=>{tabLock=0;tabSpy();});
+  setTab('results-section'); requestAnimationFrame(tabSpy); addEventListener('load',tabSpy);
+ }
  replaceOutline($('inputs-section').querySelector('.panel-heading'),'user');
  replaceOutline($('goal-section').querySelector('.panel-heading'),'target');
  replaceOutline(document.querySelector('.activity-selected'),'runner');
