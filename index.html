@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nutriție · Calculator nutrițional și plan personalizat</title>
+  <meta name="description" content="Calculator nutrițional gratuit: necesar caloric (BMR, TDEE), macronutrienți, IMC, mese și evoluția greutății, după Mifflin-St Jeor, ISSN și Hall.">
   <!--
     Fișier autonom: funcționează offline (fără CDN).
     Iconițe: Font Awesome Free 7 (CC BY 4.0) — https://fontawesome.com/license/free
@@ -3632,6 +3633,7 @@
     const I18N_ATTRS = ['aria-label', 'title', 'alt', 'placeholder'];
     const ORIG_TEXT = new WeakMap(), ORIG_ATTR = new WeakMap();
     const ORIG_TITLE = document.title;
+    const META_DESC = document.querySelector('meta[name="description"]'), ORIG_DESC = META_DESC ? META_DESC.content : '';
     const normWs = (t) => t.replace(/\s+/g, ' ').trim();
     const hasKey = (k) => Object.prototype.hasOwnProperty.call(I18N, k);
     function translateStatic(root) {
@@ -3674,6 +3676,7 @@
       if (persist) { try { localStorage.setItem('nutri_lang', LANG); } catch (e) {} }
       document.documentElement.lang = LANG;
       document.title = LANG === 'en' ? (I18N[ORIG_TITLE] || ORIG_TITLE) : ORIG_TITLE;
+      if (META_DESC) META_DESC.content = LANG === 'en' ? (I18N[ORIG_DESC] || ORIG_DESC) : ORIG_DESC;
       const btn = $('btn-lang');
       $('lang-label').textContent = LANG === 'en' ? 'RO' : 'EN';
       btn.setAttribute('aria-label', LANG === 'en' ? 'RO – Română' : 'EN – English');
@@ -3855,6 +3858,7 @@ Object.assign(I18N,{
   ,'Fibre, lichide și monitorizare':'Fibre, fluids and monitoring'
   ,'(Metabolism bazal)':'(Basal metabolism)', '(Necesar total)':'(Daily needs)'
  ,'(Indice de masă corporală)':'(Body mass index)'
+ ,'Calculator nutrițional gratuit: necesar caloric (BMR, TDEE), macronutrienți, IMC, mese și evoluția greutății, după Mifflin-St Jeor, ISSN și Hall.':'Free nutrition calculator: calorie needs (BMR, TDEE), macronutrients, BMI, meal split and weight trajectory, based on Mifflin-St Jeor, ISSN and Hall.'
 });
 const OUTLINE_PATHS={
  user:'<circle cx="12" cy="7" r="4"/><path d="M3.5 21v-2c0-4 17-4 17 0v2c-5 2-12 2-17 0Z"/>',

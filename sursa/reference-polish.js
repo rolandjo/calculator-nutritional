@@ -14,6 +14,7 @@ Object.assign(I18N,{
   ,'Fibre, lichide și monitorizare':'Fibre, fluids and monitoring'
   ,'(Metabolism bazal)':'(Basal metabolism)', '(Necesar total)':'(Daily needs)'
  ,'(Indice de masă corporală)':'(Body mass index)'
+ ,'Calculator nutrițional gratuit: necesar caloric (BMR, TDEE), macronutrienți, IMC, mese și evoluția greutății, după Mifflin-St Jeor, ISSN și Hall.':'Free nutrition calculator: calorie needs (BMR, TDEE), macronutrients, BMI, meal split and weight trajectory, based on Mifflin-St Jeor, ISSN and Hall.'
 });
 const OUTLINE_PATHS={
  user:'<circle cx="12" cy="7" r="4"/><path d="M3.5 21v-2c0-4 17-4 17 0v2c-5 2-12 2-17 0Z"/>',
