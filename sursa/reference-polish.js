@@ -74,7 +74,11 @@ function setupReferencePolish(){
  }
  controls.append(languages,themes);
  const menu=h('button',{id:'mobile-menu',type:'button','aria-label':'Meniu','aria-expanded':'false','aria-controls':'header-controls'},outlineIcon('menu'));
- menu.addEventListener('click',()=>{const open=menu.getAttribute('aria-expanded')!=='true';menu.setAttribute('aria-expanded',String(open));header.classList.toggle('menu-open',open);});
+ const setMenu=open=>{menu.setAttribute('aria-expanded',String(open));header.classList.toggle('menu-open',open);};
+ menu.addEventListener('click',()=>setMenu(menu.getAttribute('aria-expanded')!=='true'));
+ // Close the menu on a tap/click anywhere outside it, and on Escape (focus returns to the menu button).
+ document.addEventListener('pointerdown',e=>{if(header.classList.contains('menu-open')&&!controls.contains(e.target)&&!menu.contains(e.target)) setMenu(false);});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&header.classList.contains('menu-open')){setMenu(false);menu.focus();}});
  header.append(menu);
  [...$('primary-nav').children].forEach((a,i)=>replaceOutline(a,['user','heart','utensils','chart'][i]));
  // Top navigation: Profile/Goal live in the sticky sidebar, so they scroll the sidebar (not the page);
