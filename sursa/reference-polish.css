@@ -62,6 +62,18 @@
  .disclosure-trigger:hover, .disclosure-trigger[aria-expanded="true"] { background:var(--wellness-soft); color:var(--wellness-brand); }
  .nav-flash { animation:nav-flash 1.2s ease-out; }
  @keyframes nav-flash { 0%,35% { outline:2px solid var(--wellness-brand); outline-offset:3px; } 100% { outline:2px solid transparent; outline-offset:3px; } }
+ /* v38: sample state + confirmation */
+ #sample-badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:999px; background:#f3e4d6; color:#7a3f17; font-size:11px; font-weight:700; letter-spacing:.02em; text-transform:none; }
+ html.dark #sample-badge { background:#4a3222; color:#f0c9a4; }
+ #sample-badge[hidden], #sample-note[hidden], #confirm-block[hidden] { display:none !important; }
+ #sample-note { margin:8px 0 0; font-size:13px; color:#7a3f17; font-weight:500; max-width:520px; position:relative; z-index:1; }
+ html.dark #sample-note { color:#f0c9a4; }
+ #confirm-block { display:flex; flex-direction:column; gap:8px; padding:16px; border:1px solid var(--wellness-border); border-radius:18px; background:var(--wellness-surface); }
+ #btn-confirm { min-height:48px; border:0; border-radius:12px; background:#2f6f4a; color:#fff; font-size:15px; font-weight:700; cursor:pointer; }
+ #btn-confirm:hover { background:#255c3c; }
+ html.dark #btn-confirm { background:#8fd19e; color:#10251a; }
+ #confirm-block p { margin:0; font-size:12px; color:var(--wellness-muted); }
+ #btn-edit-profile { display:none; }
  /* v37: actions next to the plan */
  #hero-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; position:relative; z-index:1; }
  #hero-actions button { min-height:44px; padding:0 16px; border-radius:12px; font-size:13px; font-weight:600; gap:8px; }
@@ -283,6 +295,9 @@
  #header-controls { gap:8px; }
 }
 @media screen and (max-width:1099px) {
+ html.profile-unconfirmed #layout > #profile-sidebar, html.profile-unconfirmed #profile-sidebar { order:-1; }
+ html:not(.profile-unconfirmed) #hero-actions #btn-edit-profile { display:inline-flex; align-items:center; background:none; border:1px solid var(--wellness-border); color:var(--wellness-ink); }
+ #btn-edit-profile svg { width:16px; height:16px; }
  #layout { grid-template-columns:260px minmax(0,1fr); gap:16px; }
  #overview-pair { grid-template-columns:1fr; }
  #macro-display-section .macro-cards { grid-template-columns:repeat(3,minmax(0,1fr)); }

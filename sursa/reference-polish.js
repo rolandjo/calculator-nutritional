@@ -15,6 +15,9 @@ Object.assign(I18N,{
   ,'(Metabolism bazal)':'(Basal metabolism)', '(Necesar total)':'(Daily needs)'
  ,'(Indice de masă corporală)':'(Body mass index)', 'Categorie OMS:':'WHO category:'
  ,'Salvează planul PDF':'Save plan as PDF', 'Copiază':'Copy', 'Vezi distribuția calorică':'Show calorie distribution', 'Ascunde distribuția calorică':'Hide calorie distribution'
+ ,'Exemplu de calcul':'Sample calculation', 'Vezi planul meu':'See my plan', 'Editează profilul':'Edit profile'
+ ,'Valori implicite, nu ale tale: completează profilul și obiectivul, apoi apasă „Vezi planul meu”.':'Default values, not yours: fill in your profile and goal, then press “See my plan”.'
+ ,'Verifică datele de mai sus; după confirmare, planul se actualizează automat la orice modificare.':'Check the details above; once confirmed, the plan updates automatically whenever you change something.'
  ,'Aleg ritmul':'I choose the pace', 'Am o greutate-țintă':'I have a target weight', 'Personalizează proteinele și grăsimile':'Customise protein and fat', 'Opțiuni':'Options'
  ,'Calculator nutrițional gratuit: necesar caloric (BMR, TDEE), macronutrienți, IMC, mese și evoluția greutății, după Mifflin-St Jeor, ISSN și Hall.':'Free nutrition calculator: calorie needs (BMR, TDEE), macronutrients, BMI, meal split and weight trajectory, based on Mifflin-St Jeor, ISSN and Hall.'
 });
@@ -205,8 +208,34 @@ function setupReferencePolish(){
  };
  new MutationObserver(syncBmi).observe($('bmi-panel'),{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class']});
  syncBmi();
+ // v38: first use — results are a sample until the person confirms profile + goal with “Vezi planul meu”.
+ const sampleBadge=h('span',{id:'sample-badge'},'Exemplu de calcul');
+ $('plan-hero').firstElementChild.append(sampleBadge);
+ const sampleNote=h('p',{id:'sample-note'},'Valori implicite, nu ale tale: completează profilul și obiectivul, apoi apasă „Vezi planul meu”.');
+ $('plan-hero').firstElementChild.after(sampleNote);
+ const confirmBtn=h('button',{type:'button',id:'btn-confirm'},'Vezi planul meu');
+ const confirmBlock=h('section',{id:'confirm-block',class:'no-print'},confirmBtn,h('p',null,'Verifică datele de mai sus; după confirmare, planul se actualizează automat la orice modificare.'));
+ $('profile-sidebar').append(confirmBlock);
+ const editBtn=h('button',{type:'button',id:'btn-edit-profile'},outlineIcon('user'),h('span',null,'Editează profilul'));
+ window.syncProfileConfirm=()=>{
+  const ok=!!state.profileConfirmed;
+  document.documentElement.classList.toggle('profile-unconfirmed',!ok);
+  sampleBadge.hidden=ok; sampleNote.hidden=ok; confirmBlock.hidden=ok;
+ };
+ confirmBtn.addEventListener('click',()=>{
+  if(!validateInputs()){ const bad=document.querySelector('#profile-sidebar [aria-invalid="true"]'); if(bad) bad.focus(); return; }
+  state.profileConfirmed=true; saveState(); syncProfileConfirm(); calculate();
+  const hero=$('plan-hero'), top=hero.getBoundingClientRect().top;
+  if(top<0||top>innerHeight*0.6) hero.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  if(!hero.hasAttribute('tabindex')) hero.setAttribute('tabindex','-1'); hero.focus({preventScroll:true});
+ });
+ editBtn.addEventListener('click',()=>{
+  const sec=$('inputs-section');
+  sec.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  const first=$('input-age'); if(first) first.focus({preventScroll:true});
+ });
  // v37 #6: save/copy next to the main result; reset next to the profile.
- const heroActions=h('div',{id:'hero-actions',class:'no-print'},$('btn-print'),$('btn-copy'));
+ const heroActions=h('div',{id:'hero-actions',class:'no-print'},$('btn-print'),$('btn-copy'),editBtn);
  $('plan-hero').append(heroActions);
  const resetBtn=$('btn-reset'); resetBtn.classList.add('no-print');
  $('inputs-section').querySelector('.panel-heading').append(resetBtn);

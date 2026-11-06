@@ -1218,7 +1218,8 @@
       planMode: 'percent', // 'percent' | 'target'
       targetWeight: 90,
       targetDays: 84,
-      atLevel: 0.14
+      atLevel: 0.14,
+      profileConfirmed: false // „Vezi planul meu” apăsat: rezultatul nu mai e un exemplu
     };
 
     const ACTIVITY_FACTORS = [1.2, 1.375, 1.55, 1.725, 1.9];
@@ -1487,6 +1488,9 @@
         if ([1, 2, 3, 4, 5].includes(parsed.mealsCount)) state.mealsCount = parsed.mealsCount;
         if (HORIZONS.includes(parsed.horizonWeeks)) state.horizonWeeks = parsed.horizonWeeks;
         if (typeof parsed.useGoalWeight === 'boolean') state.useGoalWeight = parsed.useGoalWeight;
+        // Profiluri salvate înainte de v38 (fără câmp): confirmate dacă datele corporale diferă de exemplul implicit
+        state.profileConfirmed = typeof parsed.profileConfirmed === 'boolean' ? parsed.profileConfirmed
+          : ['gender', 'age', 'height', 'weight'].some(k => parsed[k] !== undefined && parsed[k] !== DEFAULTS[k]);
         if (Number.isFinite(parsed.goalWeight) && parsed.goalWeight >= 30 && parsed.goalWeight <= 300) state.goalWeight = parsed.goalWeight;
         if (parsed.planMode === 'percent' || parsed.planMode === 'target') state.planMode = parsed.planMode;
         if (AT_LEVELS.includes(parsed.atLevel)) state.atLevel = parsed.atLevel;
@@ -2660,6 +2664,7 @@
       try { localStorage.removeItem('nutri_calc_v3'); } catch (e) {}
       syncFormWithState();
       calculate();
+      if (typeof syncProfileConfirm === 'function') syncProfileConfirm();
     });
 
     // ---------- Tipărire ----------
@@ -2746,7 +2751,8 @@
       const r = lastResult;
       const m = r.macros;
       const lines = [
-        tl('REZUMAT NUTRIȚIONAL PERSONALIZAT (Mifflin-St Jeor & ISSN)', 'PERSONAL NUTRITION SUMMARY (Mifflin-St Jeor & ISSN)'),
+        state.profileConfirmed ? tl('REZUMAT NUTRIȚIONAL PERSONALIZAT (Mifflin-St Jeor & ISSN)', 'PERSONAL NUTRITION SUMMARY (Mifflin-St Jeor & ISSN)')
+          : tl('EXEMPLU DE CALCUL — valori implicite, profil neconfirmat (Mifflin-St Jeor & ISSN)', 'SAMPLE CALCULATION — default values, profile not confirmed (Mifflin-St Jeor & ISSN)'),
         '-----------------------------------------------------------',
         tl(`Sex: ${state.gender === 'male' ? 'Bărbat' : 'Femeie'} | Vârstă: ${state.age} ani | Înălțime: ${state.height} cm`, `Sex: ${state.gender === 'male' ? 'Male' : 'Female'} | Age: ${state.age} years | Height: ${state.height} cm`),
         tl(`Greutate: ${state.weight} kg${state.useRefWeight ? ` (referință proteine: ${state.refWeight} kg)` : ''}`, `Weight: ${state.weight} kg${state.useRefWeight ? ` (protein reference: ${state.refWeight} kg)` : ''}`),
@@ -3152,6 +3158,7 @@
     // ---------- Inițializare ----------
     applyTheme(document.documentElement.getAttribute('data-theme') || 'auto');
     loadSavedState();
+    if (typeof syncProfileConfirm === 'function') syncProfileConfirm();
     syncFormWithState();
     if (LANG === 'en') applyLang('en', false); else calculate({ instant: true });
     document.documentElement.classList.remove('layout-pending');
