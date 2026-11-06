@@ -62,6 +62,7 @@
  .disclosure-trigger:hover, .disclosure-trigger[aria-expanded="true"] { background:var(--wellness-soft); color:var(--wellness-brand); }
  .nav-flash { animation:nav-flash 1.2s ease-out; }
  @keyframes nav-flash { 0%,35% { outline:2px solid var(--wellness-brand); outline-offset:3px; } 100% { outline:2px solid transparent; outline-offset:3px; } }
+ #docs-tail { display:none; }
  /* v38: sample state + confirmation */
  #sample-badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:999px; background:#f3e4d6; color:#7a3f17; font-size:11px; font-weight:700; letter-spacing:.02em; text-transform:none; }
  html.dark #sample-badge { background:#4a3222; color:#f0c9a4; }
@@ -295,6 +296,7 @@
  #header-controls { gap:8px; }
 }
 @media screen and (max-width:1099px) {
+ #docs-tail { display:flex; flex-direction:column; gap:16px; order:2; width:100%; min-width:0; }
  html.profile-unconfirmed #layout > #profile-sidebar, html.profile-unconfirmed #profile-sidebar { order:-1; }
  html:not(.profile-unconfirmed) #hero-actions #btn-edit-profile { display:inline-flex; align-items:center; background:none; border:1px solid var(--wellness-border); color:var(--wellness-ink); }
  #btn-edit-profile svg { width:16px; height:16px; }

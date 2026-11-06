@@ -115,7 +115,7 @@ function setupReferencePolish(){
   const tabs=[...mobileTabs.querySelectorAll('a')], tabFor=id=>tabs.find(a=>a.getAttribute('href')==='#'+id);
   const setTab=id=>tabs.forEach(a=>a===tabFor(id)?a.setAttribute('aria-current','location'):a.removeAttribute('aria-current'));
   // Section starts in page order; each maps to the tab that covers it.
-  const zones=[['profile-sidebar','inputs-section'],['results-section','results-section'],['projection-section','projection-section'],['wellness-extras','formulas']];
+  const zones=[['profile-sidebar','inputs-section'],['results-section','results-section'],['projection-section','projection-section'],['wellness-extras','formulas'],['docs-tail','formulas']];
   let tabLock=0, tabQueued=false;
   mobileTabs.addEventListener('click',e=>{const a=e.target.closest('a'); if(a){setTab(a.getAttribute('href').slice(1)); tabLock=Date.now();}});
   const tabSpy=()=>{tabQueued=false; if(getComputedStyle(mobileTabs).display==='none'||Date.now()-tabLock<900) return;
@@ -239,6 +239,13 @@ function setupReferencePolish(){
   sec.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
   const first=$('input-age'); if(first) first.focus({preventScroll:true});
  });
+ // v42: on phones/tablets, “Detalii și formule” and “Surse științifice” go to the very end (after Profile & Goal);
+ // on desktop they stay in the results column. Markers keep their original spots.
+ const docsTail=h('div',{id:'docs-tail'}); $('layout').append(docsTail);
+ const docEls=[$('formulas'),$('references')].filter(Boolean), docMarks=docEls.map(el=>{const m=document.createComment(el.id);el.before(m);return m;});
+ const docsMq=matchMedia('(max-width:1099px)');
+ const placeDocs=()=>{ if(docsMq.matches) docsTail.append(...docEls); else docEls.forEach((el,i)=>docMarks[i].after(el)); };
+ placeDocs(); docsMq.addEventListener('change',placeDocs);
  // v37 #6: save/copy next to the main result; reset next to the profile.
  const heroActions=h('div',{id:'hero-actions',class:'no-print'},$('btn-print'),$('btn-copy'),editBtn);
  $('plan-hero').append(heroActions);
