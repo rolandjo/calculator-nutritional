@@ -262,6 +262,9 @@
  #meals-breakdown .meal-macros[open] > .meal-macro-values { display:flex; flex-wrap:wrap; column-gap:14px; row-gap:4px; grid-column:1 / -1; margin:0; font-size:11px; }
  #meal-count { display:flex; flex-wrap:wrap; width:100%; }
  #meal-count .btn-meal { flex:1 1 auto; white-space:nowrap; padding-inline:8px; }
+ /* v50: same green segmented selection as Sex and the goal mode */
+ #meal-count .btn-meal { background:transparent !important; border:0 !important; box-shadow:none !important; color:var(--wellness-ink) !important; font-weight:500; border-radius:10px; }
+ #meal-count .btn-meal[aria-pressed="true"] { background:linear-gradient(#357652,#255a40) !important; color:#fff !important; box-shadow:0 2px 3px #193c2420 !important; font-weight:600; }
  #meals-note { margin-top:10px; font-size:11px; line-height:1.5; }
  #calculation-intro { display:grid; grid-template-columns:26px minmax(0,1.45fr) minmax(210px,1fr); gap:15px; align-items:start; padding:17px 20px; }
  #calculation-intro > svg { width:26px; height:28px; color:#286749; }
