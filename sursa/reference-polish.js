@@ -330,6 +330,18 @@ function setupReferencePolish(){
  // Meal count stays visible above the meals; the split note stays below them.
  const mealCount=meals.querySelector('[role="group"]'); mealCount.id='meal-count';
  $('meals-breakdown').before(mealCount); $('meals-breakdown').after($('meals-note'));
+ // v51: “Distribuția meselor” folds to its heading (all screen sizes, open by default; print always shows it).
+ const mealsHead=meals.firstElementChild; mealsHead.id='meals-head'; mealsTitle.id='meals-title';
+ const mealsChevron=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ mealsChevron.setAttribute('viewBox','0 0 24 24'); mealsChevron.setAttribute('aria-hidden','true');
+ mealsChevron.innerHTML='<path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+ const mealsToggle=h('button',{type:'button',id:'meals-toggle',class:'card-toggle no-print','aria-expanded':'true','aria-controls':'meals-section','aria-labelledby':'meals-title'},mealsChevron);
+ mealsHead.append(mealsToggle);
+ mealsHead.addEventListener('click',e=>{
+  const btn=e.target.closest('button'); if(btn&&btn!==mealsToggle) return;
+  const collapsed=!meals.classList.contains('card-collapsed');
+  meals.classList.toggle('card-collapsed',collapsed); mealsToggle.setAttribute('aria-expanded',String(!collapsed));
+ });
  const extra=h('details',{id:'wellness-extras',class:'scientific-details scroll-target'},h('summary',null,outlineIcon('leaf'),h('span',null,'Fibre, lichide și monitorizare')));
  const fibre=$('val-fiber').closest('.print-card').parentElement;
  const monitor=[...$('results-section').children].find(el=>el.textContent.includes('Recomandare practică de monitorizare:'));

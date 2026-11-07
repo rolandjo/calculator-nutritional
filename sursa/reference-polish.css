@@ -491,3 +491,19 @@
  #inputs-section.panel-collapsed > :not(.panel-heading), #goal-section.panel-collapsed > :not(.panel-heading) { display:none !important; }
 }
 @media (prefers-reduced-motion: reduce) { .panel-toggle svg { transition:none; } }
+/* v51: “Distribuția meselor” folds to its heading on every screen size, same round chevron badge. */
+@media screen {
+ #meals-section > #meals-head { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:12px; align-items:start; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+ #meals-head > h3, #meals-head > #meal-caption { grid-column:1; }
+ #meals-head > .card-toggle { grid-column:2; grid-row:1 / span 2; align-self:center; display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; margin:-6px -6px -6px 0; padding:0; border:0; background:none; color:#286247; }
+ .card-toggle svg { width:32px; height:32px; padding:8px; border-radius:50%; background:#e3eedd; transition:transform .2s ease; transform:rotate(180deg); }
+ .card-toggle:hover svg { background:#d3e5ca; }
+ .card-collapsed .card-toggle svg { transform:none; }
+ html.dark .card-toggle { color:#cfe9d4; }
+ html.dark .card-toggle svg { background:#2d4935; }
+ html.dark .card-toggle:hover svg { background:#365c40; }
+ #meals-section.card-collapsed > :not(#meals-head) { display:none !important; }
+ /* Desktop: a folded card keeps only its heading height instead of stretching to the chart's height. */
+ #meals-section.card-collapsed { align-self:start; }
+}
+@media (prefers-reduced-motion: reduce) { .card-toggle svg { transition:none; } }
