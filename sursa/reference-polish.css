@@ -504,6 +504,7 @@
  html.dark .card-toggle:hover svg { background:#365c40; }
  #meals-section.card-collapsed > :not(#meals-head) { display:none !important; }
  /* Desktop: a folded card keeps only its heading height instead of stretching to the chart's height. */
- #meals-section.card-collapsed { align-self:start; }
 }
+/* v52: only the side-by-side desktop grid needs this; on phones (flex column) it would shrink the card's width. */
+@media screen and (min-width:1100px) { #meals-section.card-collapsed { align-self:start; } }
 @media (prefers-reduced-motion: reduce) { .card-toggle svg { transition:none; } }

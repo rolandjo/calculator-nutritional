@@ -2,7 +2,7 @@
 // Strategie: răspuns imediat din cache, actualizare în fundal (stale-while-revalidate).
 // La o versiune nouă, schimbă CACHE ca să fie șters cache-ul vechi.
 const PREFIX = 'calc-nutritional-';
-const CACHE = PREFIX + 'v51';
+const CACHE = PREFIX + 'v52';
 const ASSETS = ['./', './index.html', './en/', './en/index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png', './fonts/inter-latin-wght-normal.woff2', './fonts/inter-latin-ext-wght-normal.woff2'];
 
 // Calea aplicației (ex. /calculator-nutritional/), din scope-ul service worker-ului
