@@ -260,6 +260,44 @@ function setupReferencePolish(){
  const resetBtn=$('btn-reset'); resetBtn.classList.add('no-print');
  $('inputs-section').querySelector('.panel-heading').append(resetBtn);
  $('document-actions').hidden=true;
+ // v49: on phones, Profile and Goal fold to their heading once the plan is confirmed; open while unconfirmed.
+ // Desktop/tablet ignore the class (CSS is scoped to ≤699px), so only the phone layout changes.
+ const foldMq=matchMedia('(max-width:699px)');
+ const foldPanels=['inputs-section','goal-section'].map(id=>$(id)).filter(Boolean);
+ const setFold=(sec,collapsed)=>{ sec.classList.toggle('panel-collapsed',collapsed); sec.querySelector('.panel-toggle').setAttribute('aria-expanded',String(!collapsed)); };
+ foldPanels.forEach(sec=>{
+  const head=sec.querySelector('.panel-heading'), title=head.querySelector('h2');
+  if(!title.id) title.id=sec.id+'-title';
+  const chevron=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  chevron.setAttribute('viewBox','0 0 24 24'); chevron.setAttribute('aria-hidden','true');
+  chevron.innerHTML='<path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+  const toggle=h('button',{type:'button',class:'panel-toggle no-print','aria-expanded':'true','aria-controls':sec.id,'aria-labelledby':title.id},chevron);
+  head.append(toggle);
+  head.addEventListener('click',e=>{
+   if(!foldMq.matches) return;
+   const btn=e.target.closest('button'); if(btn&&btn!==toggle) return; // reset keeps its own action
+   setFold(sec,!sec.classList.contains('panel-collapsed'));
+  });
+ });
+ const openPanel=id=>{ const sec=$(id); if(sec&&sec.classList.contains('panel-collapsed')) setFold(sec,false); };
+ // Expand before the existing handlers scroll/focus (capture runs first): “Editează profilul”, the “Profil” tab, any #inputs/#goal link.
+ document.addEventListener('click',e=>{
+  if(e.target.closest('#btn-edit-profile')) return openPanel('inputs-section');
+  const a=e.target.closest('a[href="#inputs-section"],a[href="#goal-section"]'); if(a) openPanel(a.getAttribute('href').slice(1));
+ },true);
+ // A field flagged invalid inside a folded panel opens it, so the error is visible.
+ new MutationObserver(ms=>ms.forEach(m=>{ if(m.target.getAttribute('aria-invalid')==='true'){ const sec=foldPanels.find(s=>s.contains(m.target)); if(sec) setFold(sec,false);} }))
+  .observe($('profile-sidebar'),{subtree:true,attributes:true,attributeFilter:['aria-invalid']});
+ // Fold on load when already confirmed and right after “Vezi planul meu”; unfold when back to unconfirmed (reset).
+ let foldLast;
+ const baseSync=window.syncProfileConfirm;
+ window.syncProfileConfirm=()=>{
+  baseSync();
+  const ok=!!state.profileConfirmed;
+  if(ok!==foldLast) foldPanels.forEach(sec=>setFold(sec,ok));
+  foldLast=ok;
+ };
+ syncProfileConfirm();
  // v37 #3: legend shows name · % on screen (grams stay in the cards; print keeps grams); on phones the donut is opt-in.
  ['prot','fat','carb'].forEach(k=>{
   const g=$(`legend-${k}-g`), pct=$(`lg-${k}-pct`); if(!g||!pct) return;
